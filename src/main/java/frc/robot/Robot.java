@@ -160,6 +160,7 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("LimelightArea", area);
 
     boolean noteEndstopStatus = noteEndstop.get();
+    SmartDashboard.putBoolean("Note Endstop Status", noteEndstopStatus);
   }
 
   @Override
