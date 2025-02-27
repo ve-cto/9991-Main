@@ -13,6 +13,7 @@ import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
@@ -38,6 +39,18 @@ public class Robot extends TimedRobot {
   private DriveSubsystem driveSubsystem;
 
   private boolean preventDrive;
+  private boolean useJoystickDrive;
+
+  private static final int driveSchemeDefault = 0;
+  private static final int driveSchemeDual = 1;
+  private static final int driveSchemeJoystick = 2;
+  private int driveSchemeSelected;
+  private final SendableChooser<Integer> driveSchemeChooser = new SendableChooser<>();
+
+  private static final String autoDefault = "Default";
+  private static final String autoCustom1 = "Custom1";
+  private String autoSelected;
+  private final SendableChooser<String> autoChooser = new SendableChooser<>();
   
   WPI_VictorSPX m_shooter = new WPI_VictorSPX(3);
   WPI_VictorSPX m_loader = new WPI_VictorSPX(1);
@@ -46,22 +59,13 @@ public class Robot extends TimedRobot {
 
 
   public Robot() {
-    // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    // Initialize the SPARKs
-    // Control Motors
-    // WPI_VictorSPX m_shooter = new WPI_VictorSPX(1);
-    // WPI_VictorSPX m_loader = new WPI_VictorSPX(2);
-    // WPI_VictorSPX m_climber = new WPI_VictorSPX(3);
-    // WPI_VictorSPX m_intake = new WPI_VictorSPX(8);
-    
-    // --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
     // Create an instance of controllerMap and driveSubsystem
     controllerMap = new ControllerMap();
     driveSubsystem = new DriveSubsystem();
 
     // set preventDrive to false
     this.preventDrive = false;
+    this.useJoystickDrive = false;
 
     // setup the endstop
     noteEndstop = new DigitalInput(0);
@@ -70,6 +74,18 @@ public class Robot extends TimedRobot {
     for (int port = 5800; port <= 5809; port++) {
         PortForwarder.add(port, "limelight.local", port);
     }
+
+    SmartDashboard.getBoolean("Prevent Driver Control?", preventDrive);
+    SmartDashboard.getBoolean("Use Joysticks to Drive?", useJoystickDrive);
+
+    autoChooser.setDefaultOption("Default Auto", autoDefault);
+    autoChooser.addOption("Custom 1", autoCustom1);
+    SmartDashboard.putData("Pick an auto.", autoChooser);
+
+    driveSchemeChooser.setDefaultOption("Single-Controller Control", driveSchemeDefault);
+    driveSchemeChooser.addOption("Dual-Controller Control", driveSchemeDual);
+    driveSchemeChooser.addOption("Joystick Control", driveSchemeJoystick);
+    SmartDashboard.putData("Pick your control mode (before teleop begins)", driveSchemeChooser);
   }
 
   @Override
@@ -99,14 +115,32 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("lefX", controllerMap.getLeftXC1());
 
     SmartDashboard.putNumber("Current Speed", driveSpeedCurrent);
+
+    SmartDashboard.putNumber("Axis 0", controllerMap.getJoystickAxes(0));
+    SmartDashboard.putNumber("Axis 1", controllerMap.getJoystickAxes(1));
+    SmartDashboard.putNumber("Axis 2", controllerMap.getJoystickAxes(2));
+    SmartDashboard.putNumber("Axis 3", controllerMap.getJoystickAxes(3));
+    SmartDashboard.putNumber("Axis 4", controllerMap.getJoystickAxes(4));
+    SmartDashboard.putNumber("Axis Count", controllerMap.getAxisCount());
   }
 
   @Override
   public void autonomousInit() {
+    autoSelected = autoChooser.getSelected();
+    SmartDashboard.putString("Currently running auto:", autoSelected);
   }
 
   @Override
   public void autonomousPeriodic() {
+    switch (autoSelected) {
+      case autoCustom1:
+        // Put custom auto code here
+        break;
+      case autoDefault:
+      default:
+        // Put default auto code here
+        break;
+    }
   }
 
   @Override
@@ -115,6 +149,9 @@ public class Robot extends TimedRobot {
     this.m_shooterSet = 0.0;
     this.m_loaderSet = 0.0;
     this.m_climberSet = 0.0;
+
+    driveSchemeSelected = driveSchemeChooser.getSelected();
+    SmartDashboard.putNumber("Currently running drive scheme:", driveSchemeDefault);
   }
 
   @Override
@@ -124,6 +161,8 @@ public class Robot extends TimedRobot {
     double m_shooterSet = 0.0;
     double m_loaderSet = 0.0;
     double m_climberSet = 0.0;
+    double forward;
+    double rotation;
     driveSpeedCurrent = driveSpeedNormal;
 
 
@@ -180,9 +219,18 @@ public class Robot extends TimedRobot {
 
     // Check to see if preventDrive is true: if it is, stop control to the drive motors
     if (!preventDrive) {
-      // Arcadedrive the robot
-      double forward = controllerMap.getRightXC1();
-      double rotation = -controllerMap.getLeftYC1();
+      // Arcadedrive the robot using both the single and dual control scheme
+      if (driveSchemeSelected == 0 || driveSchemeSelected == 1) {
+        forward = controllerMap.getRightXC1();
+        rotation = -controllerMap.getLeftYC1();
+      } else if (driveSchemeSelected == 2) {
+        forward = controllerMap.getJoystickAxes(0);
+        rotation = controllerMap.getJoystickAxes(1);
+      } else {
+        forward = 0;
+        rotation = 0;
+        System.out.print("Strangely, a drive scheme could not be selected.");
+      }
       driveSubsystem.drive(forward, rotation, driveSpeedCurrent);
     }
   }

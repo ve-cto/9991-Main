@@ -1,16 +1,24 @@
 // ControllerMap.java
 package frc.robot.subsystems;
 
+import java.text.DecimalFormat;
+
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 
 public class ControllerMap {
     private XboxController controller1;
     private XboxController controller2;
+    private Joystick joystick;
     private final double triggerThreshold = 0.5;
+    private double axisValue;
+
+    private final DecimalFormat roundDouble = new DecimalFormat("#.##");
 
     public ControllerMap() {
         controller1 = new XboxController(0);
-        controller2 = new XboxController(1);
+        controller2 = new XboxController(2);
+        joystick = new Joystick(1);
     }
 
     // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -33,11 +41,11 @@ public class ControllerMap {
     }
 
     public boolean isLeftBumperC1Pressed() {
-        return controller1.getLeftBumper();
+        return controller1.getLeftBumperButton();
     }
 
     public boolean isRightBumperC1Pressed() {
-        return controller1.getRightBumper();
+        return controller1.getRightBumperButton();
     }
 
     public boolean isBackButtonC1Pressed() {
@@ -76,11 +84,11 @@ public class ControllerMap {
     }
 
     public boolean isLeftBumperC2Pressed() {
-        return controller2.getLeftBumper();
+        return controller2.getLeftBumperButton();
     }
 
     public boolean isRightBumperC2Pressed() {
-        return controller2.getRightBumper();
+        return controller2.getRightBumperButton();
     }
 
     public boolean isBackButtonC2Pressed() {
@@ -142,16 +150,32 @@ public class ControllerMap {
     public boolean isLeftTriggerC1Pressed() {
         return controller1.getLeftTriggerAxis() > triggerThreshold;
     }
-    
-    public boolean isLeftTriggerC2Pressed() {
-        return controller2.getLeftTriggerAxis() > triggerThreshold;
-    }
 
     public boolean isRightTriggerC1Pressed() {
         return controller1.getRightTriggerAxis() > triggerThreshold;
     }
-
+    
+    public boolean isLeftTriggerC2Pressed() {
+        return controller2.getLeftTriggerAxis() > triggerThreshold;
+    }
+    
     public boolean isRightTriggerC2Pressed() {
         return controller2.getRightTriggerAxis() > triggerThreshold;
     }
+
+    // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public boolean isJoystickButtonPressed(int buttonNumber) {
+        return joystick.getRawButton(buttonNumber);
+    }
+
+    public double getJoystickAxes(int axisNumber) {
+        axisValue = joystick.getRawAxis(axisNumber);
+        return axisValue;
+    }
+
+    public double getAxisCount() {
+        return joystick.getAxisCount();
+    }
+
 }
