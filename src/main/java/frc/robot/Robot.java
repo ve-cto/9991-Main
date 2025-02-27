@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import frc.robot.subsystems.ControllerMap;
+import frc.robot.subsystems.DriveSubsystem;
 
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
@@ -17,6 +18,7 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.cscore.HttpCamera;
 import edu.wpi.first.cscore.HttpCamera.HttpCameraKind;
+import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -28,10 +30,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * this project, you must also update the manifest file in the resource directory.
  */
 public class Robot extends TimedRobot {
-  private SparkMax m_leftLeader;
-  private SparkMax m_leftFollower;
-  private SparkMax m_rightLeader;
-  private SparkMax m_rightFollower;
   private SparkMax m_intake;
   private SparkMax m_loader;
   private SparkMax m_shooter;
@@ -49,8 +47,8 @@ public class Robot extends TimedRobot {
   private double driveSpeedMax;
   private double driveSpeedCurrent;
 
-  private DifferentialDrive m_robotDrive;
   private ControllerMap controllerMap;
+  private DriveSubsystem driveSubsystem;
 
   
 
@@ -63,78 +61,25 @@ public class Robot extends TimedRobot {
     m_climber = new SparkMax(3, MotorType.kBrushless);
     m_intake = new SparkMax(8, MotorType.kBrushless);
     
-    // Drive Motors
-    m_rightLeader = new SparkMax(4, MotorType.kBrushless);
-    m_rightFollower = new SparkMax(5, MotorType.kBrushless);
-    m_leftLeader = new SparkMax(6, MotorType.kBrushless);
-    m_leftFollower = new SparkMax(7, MotorType.kBrushless);
-    
-    m_robotDrive = new DifferentialDrive(m_leftLeader, m_rightLeader);
-
-    /*
-     * Create new SPARK MAX configuration objects. These will store the
-     * configuration parameters for the SPARK MAXes that we will set below.
-     */
-    SparkMaxConfig globalConfig = new SparkMaxConfig();
-    SparkMaxConfig rightLeaderConfig = new SparkMaxConfig();
-    SparkMaxConfig leftFollowerConfig = new SparkMaxConfig();
-    SparkMaxConfig rightFollowerConfig = new SparkMaxConfig();
-
-    /*
-     * Set parameters that will apply to all SPARKs. We will also use this as
-     * the left leader config.
-     */
-    globalConfig
-        .smartCurrentLimit(50)
-        .idleMode(IdleMode.kBrake);
-
-    // Apply the global config and invert since it is on the opposite side
-    rightLeaderConfig
-        .apply(globalConfig)
-        .inverted(true);
-
-    // Apply the global config and set the leader SPARK for follower mode
-    leftFollowerConfig
-        .apply(globalConfig)
-        .follow(m_leftLeader);
-
-    // Apply the global config and set the leader SPARK for follower mode
-    rightFollowerConfig
-        .apply(globalConfig)
-        .follow(m_rightLeader);
-
-    /*
-     * Apply the configuration to the SPARKs.
-     *
-     * kResetSafeParameters is used to get the SPARK MAX to a known state. This
-     * is useful in case the SPARK MAX is replaced.
-     *
-     * kPersistParameters is used to ensure the configuration is not lost when
-     * the SPARK MAX loses power. This is useful for power cycles that may occur
-     * mid-operation.
-     */
-    m_leftLeader.configure(globalConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    m_leftFollower.configure(leftFollowerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    m_rightLeader.configure(rightLeaderConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    m_rightFollower.configure(rightFollowerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-
     // --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     // Intialize the controllermap
     controllerMap = new ControllerMap();
+    driveSubsystem = new DriveSubsystem();
     
-    
-
-    // Initialize the Limelight camera stream
-    HttpCamera limelightFeed = new HttpCamera("limelight", "http://10.TE.AM.11:5800/stream.mjpg", HttpCameraKind.kMJPGStreamer);
-    CameraServer.startAutomaticCapture(limelightFeed);
-
+    // define drive speeds
     this.driveSpeedSlow = 0.6;
     this.driveSpeedNormal = 0.7;
     this.driveSpeedFast = 0.8;
-    this.driveSpeedMax = 0.9;
+    this.driveSpeedMax = 1.0;
 
+    // setup the endstop
     noteEndstop = new DigitalInput(0);
+  
+    // forward port 5800-5809 to the limelight (useful for USB control)
+    for (int port = 5800; port <= 5809; port++) {
+        PortForwarder.add(port, "limelight.local", port);
+    }
   }
 
   @Override
@@ -143,18 +88,17 @@ public class Robot extends TimedRobot {
     // SmartDashboard.putNumber("Left Out", m_leftLeader.getAppliedOutput());
     // SmartDashboard.putNumber("Right Out", m_rightLeader.getAppliedOutput());
 
-    // Access Limelight values
     NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
     NetworkTableEntry tx = table.getEntry("tx");
     NetworkTableEntry ty = table.getEntry("ty");
     NetworkTableEntry ta = table.getEntry("ta");
 
-    // Read values periodically
+    //read values periodically
     double x = tx.getDouble(0.0);
     double y = ty.getDouble(0.0);
     double area = ta.getDouble(0.0);
 
-    // Post to SmartDashboard periodically
+    //post to smart dashboard periodically
     SmartDashboard.putNumber("LimelightX", x);
     SmartDashboard.putNumber("LimelightY", y);
     SmartDashboard.putNumber("LimelightArea", area);
@@ -241,7 +185,7 @@ public class Robot extends TimedRobot {
     // Arcadedrive the robot
     double forward = -controllerMap.getLeftYC1()*driveSpeedCurrent;
     double rotation = controllerMap.getRightXC1()*driveSpeedCurrent;
-    m_robotDrive.arcadeDrive(forward, rotation);
+    driveSubsystem.drive(forward, rotation, driveSpeedCurrent);
   }
 
   @Override
