@@ -76,7 +76,14 @@ public class DriveSubsystem {
 
     /*
      * Drive the robot.
-     * Speed is multiplied by forward and rotation. If you want absolute values, use the "Max" speed.
+     * Speed is multiplied by forward and rotation. 
+     * The speeds are as follows:
+     *  driveSlowSpeed
+     *  driveNormalSpeed
+     *  driveFastSpeed
+     *  driveMaxSpeed
+     *  driveCurrentSpeed (Defined from controller triggers)
+     * If you want absolute values, use the "Max" speed.
      */
     public void drive(Double forward, Double rotation, Double speed) {
         m_robotDrive.arcadeDrive(forward*speed, rotation*speed);

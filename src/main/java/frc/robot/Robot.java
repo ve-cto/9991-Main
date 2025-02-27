@@ -1,23 +1,13 @@
 package frc.robot;
 
-import edu.wpi.first.util.sendable.SendableRegistry;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import frc.robot.subsystems.ControllerMap;
+
 import frc.robot.subsystems.DriveSubsystem;
-
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.SparkMaxConfig;
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
 
-import edu.wpi.first.cameraserver.CameraServer;
-import edu.wpi.first.cscore.HttpCamera;
-import edu.wpi.first.cscore.HttpCamera.HttpCameraKind;
 import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
@@ -41,14 +31,16 @@ public class Robot extends TimedRobot {
   private double m_loaderSet;
   private double m_climberSet;
   
-  private double driveSpeedSlow;
-  private double driveSpeedNormal;
-  private double driveSpeedFast;
-  private double driveSpeedMax;
+  private static double driveSpeedSlow = 0.6;
+  private static double driveSpeedNormal = 0.7;
+  private static double driveSpeedFast = 0.8;
+  private static double driveSpeedMax = 1.0;
   private double driveSpeedCurrent;
 
   private ControllerMap controllerMap;
   private DriveSubsystem driveSubsystem;
+
+  private boolean preventDrive;
 
   
 
@@ -63,15 +55,12 @@ public class Robot extends TimedRobot {
     
     // --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    // Intialize the controllermap
+    // Create an instance of controllerMap and driveSubsystem
     controllerMap = new ControllerMap();
     driveSubsystem = new DriveSubsystem();
-    
-    // define drive speeds
-    this.driveSpeedSlow = 0.6;
-    this.driveSpeedNormal = 0.7;
-    this.driveSpeedFast = 0.8;
-    this.driveSpeedMax = 1.0;
+
+    // set preventDrive to false
+    this.preventDrive = false;
 
     // setup the endstop
     noteEndstop = new DigitalInput(0);
@@ -125,40 +114,42 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
+    // Reset all the motors to 0 (They will be changed later in the cycle, so this is temporary.)
     double m_intakeSet = 0.0;
     double m_shooterSet = 0.0;
     double m_loaderSet = 0.0;
     double m_climberSet = 0.0;
+    driveSpeedCurrent = driveSpeedNormal;
+
 
     // Handle Action Buttons
     if (controllerMap.isAButtonC1Pressed() && !controllerMap.isBButtonC1Pressed()) {
+      // A button is pressed, but not B button (Spin up shooter)
       m_shooterSet = 1.0;
     } else if (controllerMap.isBButtonC1Pressed() && controllerMap.isAButtonC1Pressed()) {
+      // B button AND a button is pressed (Full shoot)
       m_shooterSet = 1.0;
       m_intakeSet = -0.7;
       m_loaderSet = 1.0;
-    } else if (controllerMap.isXButtonC1Pressed() && !controllerMap.isAButtonC1Pressed()) {
+    } else if (controllerMap.isXButtonC1Pressed() && !controllerMap.isAButtonC1Pressed() && !controllerMap.isYButtonC1Pressed()) {
+    // X button is pressed, but not A or Y (prevent override of variable) (suck in note)
       m_shooterSet = -0.5;
       m_loaderSet = -0.5;
     } else if (controllerMap.isYButtonC1Pressed() && !controllerMap.isAButtonC1Pressed() && !controllerMap.isXButtonC1Pressed()) {
+    // Y button is pressed, but not A, Y or X (drop into amp)
       m_shooterSet = -0.4;
       m_loaderSet = -0.4;
       m_intakeSet = -0.3;
-    } else if (controllerMap.isLeftBumperC1Pressed() && controllerMap.isRightBumperC1Pressed()) {
-      m_intakeSet = 0.0;
-    } else {
-      m_shooterSet = 0.0;
-      m_climberSet = 0.0;
-      m_loaderSet = 0.0;
     }
 
     // Handle Bumpers
+    // Left Bumper (Eject)
     if (controllerMap.isLeftBumperC1Pressed() && !controllerMap.isBButtonC1Pressed() && !controllerMap.isYButtonC1Pressed() && !controllerMap.isRightBumperC1Pressed()) {
       m_intakeSet = 0.6;
+    // Right Bumper (Intake)
     } else if (controllerMap.isRightBumperC1Pressed() && !controllerMap.isBButtonC1Pressed() && !controllerMap.isYButtonC1Pressed() && !controllerMap.isLeftBumperC1Pressed()) {
       m_intakeSet = -0.6;
     }
-
 
     // Handle Triggers
     if (controllerMap.isLeftTriggerC1Pressed() && !controllerMap.isRightTriggerC1Pressed()) {
@@ -166,26 +157,29 @@ public class Robot extends TimedRobot {
     } else if (controllerMap.isRightTriggerC1Pressed() && !controllerMap.isLeftTriggerC1Pressed()) {
       driveSpeedCurrent = driveSpeedFast;
     } else if (controllerMap.isLeftTriggerC1Pressed() && controllerMap.isRightTriggerC1Pressed()) {
+      // If both of the triggers are held at the same time, max the motors.
       driveSpeedCurrent = driveSpeedMax;
-    } else {
-      driveSpeedCurrent = driveSpeedNormal;
     }
 
+    // Take the desired motor values, and push them to this (main class).
     this.m_shooterSet = m_shooterSet;
     this.m_intakeSet = m_intakeSet;
     this.m_loaderSet = m_loaderSet;
     this.m_climberSet = m_climberSet;
 
-
+    // Set the motors to their values in the main class.
     m_shooter.set(this.m_shooterSet);
     m_intake.set(this.m_intakeSet);
     m_loader.set(this.m_loaderSet);
     m_climber.set(this.m_climberSet);
 
-    // Arcadedrive the robot
-    double forward = -controllerMap.getLeftYC1()*driveSpeedCurrent;
-    double rotation = controllerMap.getRightXC1()*driveSpeedCurrent;
-    driveSubsystem.drive(forward, rotation, driveSpeedCurrent);
+    // Check to see if preventDrive is true: if it is, stop control to the drive motors
+    if (!preventDrive) {
+      // Arcadedrive the robot
+      double forward = -controllerMap.getLeftYC1();
+      double rotation = controllerMap.getRightXC1();
+      driveSubsystem.drive(forward, rotation, driveSpeedCurrent);
+    }
   }
 
   @Override
