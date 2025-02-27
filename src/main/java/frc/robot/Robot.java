@@ -5,8 +5,9 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import frc.robot.subsystems.ControllerMap;
 
 import frc.robot.subsystems.DriveSubsystem;
+
+import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.SparkMax;
 
 import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.networktables.NetworkTable;
@@ -20,10 +21,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * this project, you must also update the manifest file in the resource directory.
  */
 public class Robot extends TimedRobot {
-  private SparkMax m_intake;
-  private SparkMax m_loader;
-  private SparkMax m_shooter;
-  private SparkMax m_climber;
   private DigitalInput noteEndstop;
 
   private double m_intakeSet;
@@ -41,17 +38,21 @@ public class Robot extends TimedRobot {
   private DriveSubsystem driveSubsystem;
 
   private boolean preventDrive;
-
   
+  WPI_VictorSPX m_shooter = new WPI_VictorSPX(3);
+  WPI_VictorSPX m_loader = new WPI_VictorSPX(1);
+  WPI_VictorSPX m_climber = new WPI_VictorSPX(2);
+  WPI_VictorSPX m_intake = new WPI_VictorSPX(8);
+
 
   public Robot() {
     // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     // Initialize the SPARKs
     // Control Motors
-    m_shooter = new SparkMax(1, MotorType.kBrushless);
-    m_loader = new SparkMax(2, MotorType.kBrushless);
-    m_climber = new SparkMax(3, MotorType.kBrushless);
-    m_intake = new SparkMax(8, MotorType.kBrushless);
+    // WPI_VictorSPX m_shooter = new WPI_VictorSPX(1);
+    // WPI_VictorSPX m_loader = new WPI_VictorSPX(2);
+    // WPI_VictorSPX m_climber = new WPI_VictorSPX(3);
+    // WPI_VictorSPX m_intake = new WPI_VictorSPX(8);
     
     // --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -94,6 +95,10 @@ public class Robot extends TimedRobot {
 
     boolean noteEndstopStatus = noteEndstop.get();
     SmartDashboard.putBoolean("Note Endstop Status", noteEndstopStatus);
+
+    SmartDashboard.putNumber("lefX", controllerMap.getLeftXC1());
+
+    SmartDashboard.putNumber("Current Speed", driveSpeedCurrent);
   }
 
   @Override
@@ -176,8 +181,8 @@ public class Robot extends TimedRobot {
     // Check to see if preventDrive is true: if it is, stop control to the drive motors
     if (!preventDrive) {
       // Arcadedrive the robot
-      double forward = -controllerMap.getLeftYC1();
-      double rotation = controllerMap.getRightXC1();
+      double forward = controllerMap.getRightXC1();
+      double rotation = -controllerMap.getLeftYC1();
       driveSubsystem.drive(forward, rotation, driveSpeedCurrent);
     }
   }
