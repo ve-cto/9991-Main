@@ -1,7 +1,4 @@
 package frc.robot.subsystems.maps;
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableEntry;
-import edu.wpi.first.networktables.NetworkTableInstance;
 import frc.robot.LimelightHelpers;
 import frc.robot.subsystems.tools.MapRanges;
 
@@ -9,8 +6,6 @@ public class LimelightMap {
     MapRanges mapRanges = new MapRanges();
 
     private String Limelight = "limelight";
-
-    private LimelightHelpers limelightHelpers = new LimelightHelpers();
 
     private double limelightTA = LimelightHelpers.getTA("limelight");
     private double limelightTY = LimelightHelpers.getTY("limelight");
@@ -22,10 +17,10 @@ public class LimelightMap {
 
     private double[] robotPose = LimelightHelpers.getTargetPose_CameraSpace(Limelight);
 
-    // simple proportional turning control with Limelight.
-    // "proportional control" is a control algorithm in which the output is proportional to the error.
-    // in this case, we are going to return an angular velocity that is proportional to the 
-    // "tx" value from the Limelight.
+    public int getTargetCount() {
+        return tc;
+    }
+
     public double limelightAimProportional() {    
         // control the intensity of the robots movements: too high = oscilate, too low = not enough power to move
         double kP = 0.1;

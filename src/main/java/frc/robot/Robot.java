@@ -8,12 +8,8 @@ import frc.robot.subsystems.maps.ControllerMap;
 import frc.robot.subsystems.tools.MapRanges;
 
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import edu.wpi.first.net.PortForwarder;
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableEntry;
-import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -69,9 +65,8 @@ public class Robot extends TimedRobot {
     mapRanges = new MapRanges();
     limelightDriveSubsystem = new LimelightDriveSubsystem();
 
-    // set preventDrive to false
+    // set preventDrive to false on init
     this.preventDrive = false;
-    this.useJoystickDrive = false;
 
     // setup the endstop
     noteEndstop = new DigitalInput(0);
@@ -124,17 +119,18 @@ public class Robot extends TimedRobot {
   public void autonomousPeriodic() {
     switch (autoSelected) {
       case autoCustom1:
-        // Put custom auto code here
+        // code in here...
         break;
       case autoDefault:
       default:
-        // Put default auto code here
+        // code in here...
         break;
     }
   }
 
   @Override
   public void teleopInit() {
+    // Reset all the motors to 0, after auto is completed
     this.m_intakeSet = 0.0;
     this.m_shooterSet = 0.0;
     this.m_loaderSet = 0.0;
@@ -195,7 +191,7 @@ public class Robot extends TimedRobot {
       driveSpeedCurrent = driveSpeedMax;
     }
 
-    // Take the desired motor values, and push them to this (main class).
+    // Take the desired motor values, and push them to this. This forces them to reset at the end of an auto, and means that they are public and accessible in other classes
     this.m_shooterSet = m_shooterSet;
     this.m_intakeSet = m_intakeSet;
     this.m_loaderSet = m_loaderSet;
@@ -225,8 +221,13 @@ public class Robot extends TimedRobot {
       }
 
       if (controllerMap.isRightStickButtonC1Pressed()) {
+        // Aim and range on right-stick
         limelightDriveSubsystem.aimAndRange(40);
+      } else if (controllerMap.isLeftStickButtonC1Pressed()) {
+        // Aim on left-stick
+        limelightDriveSubsystem.aim(0.0);
       } else {
+        // If not currently using a limelight action, drive normally
         driveSubsystem.drive(forward, rotation, driveSpeedCurrent);
       }
     }

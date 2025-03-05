@@ -1,8 +1,6 @@
 // ControllerMap.java
 package frc.robot.subsystems.maps;
 
-import java.text.DecimalFormat;
-
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 

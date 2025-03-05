@@ -18,4 +18,15 @@ public class LimelightDriveSubsystem {
         driveSubsystem.drive(forward, rotation, 1.0);
     }
     
+    public void range(double desiredArea, double rotation) {
+        double forward = limelightMap.limelightRangeProportional(desiredArea);
+
+        driveSubsystem.drive(forward, rotation, 1.0);
+    }
+
+    public void aim(double forward) {
+        double rotation = limelightMap.limelightAimProportional();
+
+        driveSubsystem.drive(forward, rotation, 1.0);
+    }
 }
