@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.TimedRobot;
 import frc.robot.subsystems.commands.DriveSubsystem;
 import frc.robot.subsystems.maps.ControllerMap;
+import frc.robot.subsystems.tools.MapRanges;
 
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -36,6 +37,7 @@ public class Robot extends TimedRobot {
 
   private ControllerMap controllerMap;
   private DriveSubsystem driveSubsystem;
+  private MapRanges mapRanges;
 
   private boolean preventDrive;
   private boolean useJoystickDrive;
@@ -62,6 +64,7 @@ public class Robot extends TimedRobot {
     // Create an instance of controllerMap and driveSubsystem
     controllerMap = new ControllerMap();
     driveSubsystem = new DriveSubsystem();
+    mapRanges = new MapRanges();
 
     // set preventDrive to false
     this.preventDrive = false;
@@ -103,11 +106,6 @@ public class Robot extends TimedRobot {
     double x = tx.getDouble(0.0);
     double y = ty.getDouble(0.0);
     double area = ta.getDouble(0.0);
-
-    //post to smart dashboard periodically
-    SmartDashboard.putNumber("LimelightX", x);
-    SmartDashboard.putNumber("LimelightY", y);
-    SmartDashboard.putNumber("LimelightArea", area);
 
     boolean noteEndstopStatus = noteEndstop.get();
     SmartDashboard.putBoolean("Note Endstop Status", noteEndstopStatus);

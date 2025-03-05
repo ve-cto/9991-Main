@@ -6,6 +6,13 @@
   "configurations": [
     {
       "type": "java",
+      "name": "MapRanges",
+      "request": "launch",
+      "mainClass": "frc.robot.subsystems.tools.MapRanges",
+      "projectName": "9991-Main"
+    },
+    {
+      "type": "java",
       "name": "Main",
       "request": "launch",
       "mainClass": "frc.robot.Main",
