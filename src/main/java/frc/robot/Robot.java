@@ -3,6 +3,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.TimedRobot;
 import frc.robot.subsystems.commands.DriveSubsystem;
+import frc.robot.subsystems.commands.LimelightDriveSubsystem;
 import frc.robot.subsystems.maps.ControllerMap;
 import frc.robot.subsystems.tools.MapRanges;
 
@@ -38,6 +39,7 @@ public class Robot extends TimedRobot {
   private ControllerMap controllerMap;
   private DriveSubsystem driveSubsystem;
   private MapRanges mapRanges;
+  private LimelightDriveSubsystem limelightDriveSubsystem;
 
   private boolean preventDrive;
   private boolean useJoystickDrive;
@@ -65,6 +67,7 @@ public class Robot extends TimedRobot {
     controllerMap = new ControllerMap();
     driveSubsystem = new DriveSubsystem();
     mapRanges = new MapRanges();
+    limelightDriveSubsystem = new LimelightDriveSubsystem();
 
     // set preventDrive to false
     this.preventDrive = false;
@@ -96,16 +99,6 @@ public class Robot extends TimedRobot {
     // Display the applied output of the left and right side onto the dashboard
     // SmartDashboard.putNumber("Left Out", m_leftLeader.getAppliedOutput());
     // SmartDashboard.putNumber("Right Out", m_rightLeader.getAppliedOutput());
-
-    NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
-    NetworkTableEntry tx = table.getEntry("tx");
-    NetworkTableEntry ty = table.getEntry("ty");
-    NetworkTableEntry ta = table.getEntry("ta");
-
-    //read values periodically
-    double x = tx.getDouble(0.0);
-    double y = ty.getDouble(0.0);
-    double area = ta.getDouble(0.0);
 
     boolean noteEndstopStatus = noteEndstop.get();
     SmartDashboard.putBoolean("Note Endstop Status", noteEndstopStatus);
@@ -187,8 +180,8 @@ public class Robot extends TimedRobot {
     // Left Bumper (Eject)
     if (controllerMap.isLeftBumperC1Pressed() && !controllerMap.isBButtonC1Pressed() && !controllerMap.isYButtonC1Pressed() && !controllerMap.isRightBumperC1Pressed()) {
       m_intakeSet = 0.6;
-    // Right Bumper (Intake)
-    } else if (controllerMap.isRightBumperC1Pressed() && !controllerMap.isBButtonC1Pressed() && !controllerMap.isYButtonC1Pressed() && !controllerMap.isLeftBumperC1Pressed()) {
+    // Right Bumper (Intake until endstop)
+    } else if (controllerMap.isRightBumperC1Pressed() && !controllerMap.isBButtonC1Pressed() && !controllerMap.isYButtonC1Pressed() && !controllerMap.isLeftBumperC1Pressed() && !noteEndstop.get()) {
       m_intakeSet = -0.6;
     }
 
@@ -218,7 +211,7 @@ public class Robot extends TimedRobot {
 
     // Check to see if preventDrive is true: if it is, stop control to the drive motors
     if (!preventDrive) {
-      // Arcadedrive the robot using both the single and dual control scheme
+      // Arcadedrive the robot using the selected drive scheme
       if (driveSchemeSelected == 0 || driveSchemeSelected == 1) {
         forward = controllerMap.getRightXC1();
         rotation = -controllerMap.getLeftYC1();
@@ -228,18 +221,14 @@ public class Robot extends TimedRobot {
       } else {
         forward = 0;
         rotation = 0;
-        System.out.print("Strangely, a drive scheme could not be selected.");
+        System.out.print("Strangely, a drive scheme could not be selected, or an error occured.");
       }
 
       if (controllerMap.isRightStickButtonC1Pressed()) {
-        double limelightRotationAdjust = 0.055;
-        double limelightTurnDelta = LimelightHelpers.getTX("limelight") * limelightRotationAdjust;
-        forward = 0;
-        forward += limelightTurnDelta;
-        rotation = 0;
+        limelightDriveSubsystem.aimAndRange(40);
+      } else {
+        driveSubsystem.drive(forward, rotation, driveSpeedCurrent);
       }
-
-      driveSubsystem.drive(forward, rotation, driveSpeedCurrent);
     }
   }
 

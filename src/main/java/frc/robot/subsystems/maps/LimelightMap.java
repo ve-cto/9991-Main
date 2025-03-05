@@ -8,26 +8,27 @@ import frc.robot.subsystems.tools.MapRanges;
 public class LimelightMap {
     MapRanges mapRanges = new MapRanges();
 
-    String Limelight = "limelight";
+    private String Limelight = "limelight";
 
-    LimelightHelpers limelightHelpers = new LimelightHelpers();
+    private LimelightHelpers limelightHelpers = new LimelightHelpers();
 
-    NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
-    NetworkTableEntry tx = table.getEntry("tx");
-    NetworkTableEntry ty = table.getEntry("ty");
-    NetworkTableEntry ta = table.getEntry("ta");
+    private double limelightTA = LimelightHelpers.getTA("limelight");
+    private double limelightTY = LimelightHelpers.getTY("limelight");
+    private double limelightTX = LimelightHelpers.getTX("limelight");
+    // double limelightTC = LimelightHelpers.getTA("limelight");
 
-    int tc = LimelightHelpers.getTargetCount(Limelight);
 
-    double[] robotPose = LimelightHelpers.getTargetPose_CameraSpace(Limelight);
+    private int tc = LimelightHelpers.getTargetCount(Limelight);
+
+    private double[] robotPose = LimelightHelpers.getTargetPose_CameraSpace(Limelight);
 
     // simple proportional turning control with Limelight.
     // "proportional control" is a control algorithm in which the output is proportional to the error.
     // in this case, we are going to return an angular velocity that is proportional to the 
     // "tx" value from the Limelight.
-    double limelight_aim_proportional() {    
+    public double limelightAimProportional() {    
         // control the intensity of the robots movements: too high = oscilate, too low = not enough power to move
-        double kP = .035;
+        double kP = 0.1;
 
         double targetingAngleUnmapped = LimelightHelpers.getTX("limelight") * kP;
 
@@ -39,13 +40,32 @@ public class LimelightMap {
         return targetDesiredRotationSpeed;
     }
 
-    // simple proportional ranging control with Limelight's "ty" value
-    // this works best if your Limelight's mount height and target mount height are different.
-    // if your limelight and target are mounted at the same or similar heights, use "ta" (area) for target ranging rather than "ty"
-    double limelight_range_proportional() {    
-        double kP = .1;
-        double targetingForwardSpeed = LimelightHelpers.getTY("limelight") * kP;
-        targetingForwardSpeed *= -1.0;
+    public double limelightRangeProportional(double desiredArea) {    
+        double kP = 0.1;
+        double error = desiredArea - limelightTA;
+        double targetingForwardSpeed = 0;
+
+        // Check if it's valid
+        if (limelightTA > 0) {
+            targetingForwardSpeed = mapRanges.Map(error * kP, -100 * kP, 100 * kP, -1, 1);
+        }
         return targetingForwardSpeed;
+    }
+
+    public double[] limelightAimAndRangeProportional(double desiredArea) {
+        double forward = 0;
+        double rotation = 0;
+        double kP = 0.1;
+        double error = desiredArea - limelightTA;
+
+
+        // Check if it's valid
+        if (limelightTA > 0) {
+            forward = mapRanges.Map(error * kP, -100 * kP, 100 * kP, -1, 1);
+            rotation = mapRanges.MapTX(limelightTX)*kP;
+        }
+
+        double[] returnValues = {forward, rotation};
+        return returnValues;
     }
 }
