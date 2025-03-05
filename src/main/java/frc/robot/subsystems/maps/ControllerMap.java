@@ -1,5 +1,5 @@
 // ControllerMap.java
-package frc.robot.subsystems;
+package frc.robot.subsystems.maps;
 
 import java.text.DecimalFormat;
 
@@ -13,7 +13,6 @@ public class ControllerMap {
     private final double triggerThreshold = 0.5;
     private double axisValue;
 
-    private final DecimalFormat roundDouble = new DecimalFormat("#.##");
 
     public ControllerMap() {
         controller1 = new XboxController(0);

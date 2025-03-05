@@ -2,9 +2,8 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.TimedRobot;
-import frc.robot.subsystems.ControllerMap;
-
-import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.commands.DriveSubsystem;
+import frc.robot.subsystems.maps.ControllerMap;
 
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -44,6 +43,7 @@ public class Robot extends TimedRobot {
   private static final int driveSchemeDefault = 0;
   private static final int driveSchemeDual = 1;
   private static final int driveSchemeJoystick = 2;
+  private static final String[] DRIVE_SCHEME_STRINGS = {"Single-Controller", "Dual-Controller", "Joystick"};
   private int driveSchemeSelected;
   private final SendableChooser<Integer> driveSchemeChooser = new SendableChooser<>();
 
@@ -85,7 +85,7 @@ public class Robot extends TimedRobot {
     driveSchemeChooser.setDefaultOption("Single-Controller Control", driveSchemeDefault);
     driveSchemeChooser.addOption("Dual-Controller Control", driveSchemeDual);
     driveSchemeChooser.addOption("Joystick Control", driveSchemeJoystick);
-    SmartDashboard.putData("Pick your control mode (before teleop begins)", driveSchemeChooser);
+    SmartDashboard.putData("selectedDriveMode", driveSchemeChooser);
   }
 
   @Override
@@ -112,16 +112,15 @@ public class Robot extends TimedRobot {
     boolean noteEndstopStatus = noteEndstop.get();
     SmartDashboard.putBoolean("Note Endstop Status", noteEndstopStatus);
 
-    SmartDashboard.putNumber("lefX", controllerMap.getLeftXC1());
-
     SmartDashboard.putNumber("Current Speed", driveSpeedCurrent);
 
-    SmartDashboard.putNumber("Axis 0", controllerMap.getJoystickAxes(0));
-    SmartDashboard.putNumber("Axis 1", controllerMap.getJoystickAxes(1));
-    SmartDashboard.putNumber("Axis 2", controllerMap.getJoystickAxes(2));
-    SmartDashboard.putNumber("Axis 3", controllerMap.getJoystickAxes(3));
-    SmartDashboard.putNumber("Axis 4", controllerMap.getJoystickAxes(4));
-    SmartDashboard.putNumber("Axis Count", controllerMap.getAxisCount());
+    
+    // SmartDashboard.putNumber("Axis 0", controllerMap.getJoystickAxes(0));
+    // SmartDashboard.putNumber("Axis 1", controllerMap.getJoystickAxes(1));
+    // SmartDashboard.putNumber("Axis 2", controllerMap.getJoystickAxes(2));
+    // SmartDashboard.putNumber("Axis 3", controllerMap.getJoystickAxes(3));
+    // SmartDashboard.putNumber("Axis 4", controllerMap.getJoystickAxes(4));
+    // SmartDashboard.putNumber("Axis Count", controllerMap.getAxisCount());
   }
 
   @Override
@@ -151,7 +150,7 @@ public class Robot extends TimedRobot {
     this.m_climberSet = 0.0;
 
     driveSchemeSelected = driveSchemeChooser.getSelected();
-    SmartDashboard.putNumber("Currently running drive scheme:", driveSchemeDefault);
+    SmartDashboard.putString("Current drive scheme:", DRIVE_SCHEME_STRINGS[driveSchemeSelected]);
   }
 
   @Override
@@ -166,7 +165,7 @@ public class Robot extends TimedRobot {
     driveSpeedCurrent = driveSpeedNormal;
 
 
-    // Handle Action Buttons
+    // Handle Buttons
     if (controllerMap.isAButtonC1Pressed() && !controllerMap.isBButtonC1Pressed()) {
       // A button is pressed, but not B button (Spin up shooter)
       m_shooterSet = 1.0;
@@ -217,6 +216,8 @@ public class Robot extends TimedRobot {
     m_loader.set(this.m_loaderSet);
     m_climber.set(this.m_climberSet);
 
+
+
     // Check to see if preventDrive is true: if it is, stop control to the drive motors
     if (!preventDrive) {
       // Arcadedrive the robot using both the single and dual control scheme
@@ -231,6 +232,15 @@ public class Robot extends TimedRobot {
         rotation = 0;
         System.out.print("Strangely, a drive scheme could not be selected.");
       }
+
+      if (controllerMap.isRightStickButtonC1Pressed()) {
+        double limelightRotationAdjust = 0.055;
+        double limelightTurnDelta = LimelightHelpers.getTX("limelight") * limelightRotationAdjust;
+        forward = 0;
+        forward += limelightTurnDelta;
+        rotation = 0;
+      }
+
       driveSubsystem.drive(forward, rotation, driveSpeedCurrent);
     }
   }
