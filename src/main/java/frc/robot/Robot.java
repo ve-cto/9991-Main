@@ -6,6 +6,7 @@ import frc.robot.subsystems.commands.DriveSubsystem;
 import frc.robot.subsystems.commands.LimelightDriveSubsystem;
 import frc.robot.subsystems.maps.ControllerMap;
 import frc.robot.subsystems.tools.MapRanges;
+import frc.robot.subsystems.maps.LimelightMap;
 
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 
@@ -36,6 +37,7 @@ public class Robot extends TimedRobot {
   private DriveSubsystem driveSubsystem;
   private MapRanges mapRanges;
   private LimelightDriveSubsystem limelightDriveSubsystem;
+  private LimelightMap limelightMap;
 
   private boolean preventDrive;
   private boolean useJoystickDrive;
@@ -63,6 +65,7 @@ public class Robot extends TimedRobot {
     controllerMap = new ControllerMap();
     driveSubsystem = new DriveSubsystem();
     mapRanges = new MapRanges();
+    limelightMap = new LimelightMap();
     limelightDriveSubsystem = new LimelightDriveSubsystem();
 
     // set preventDrive to false on init
@@ -107,6 +110,14 @@ public class Robot extends TimedRobot {
     // SmartDashboard.putNumber("Axis 3", controllerMap.getJoystickAxes(3));
     // SmartDashboard.putNumber("Axis 4", controllerMap.getJoystickAxes(4));
     // SmartDashboard.putNumber("Axis Count", controllerMap.getAxisCount());
+
+    // double limelightTA = limelightMap.getTA();
+    // double limelightTX = limelightMap.getTX();
+    // double limelightTY = limelightMap.getTY();
+
+    // SmartDashboard.putNumber("Limelight TA", limelightTA);
+    // SmartDashboard.putNumber("Limelight TX", limelightTX);
+    // SmartDashboard.putNumber("Limelight TY", limelightTY);
   }
 
   @Override
@@ -220,12 +231,15 @@ public class Robot extends TimedRobot {
         System.out.print("Strangely, a drive scheme could not be selected, or an error occured.");
       }
 
-      if (controllerMap.isRightStickButtonC1Pressed()) {
-        // Aim and range on right-stick
+      if (controllerMap.isStartButtonC1Pressed()) {
+        // Aim and Range on Start Button
         limelightDriveSubsystem.aimAndRange(40);
+      } else if (controllerMap.isRightStickButtonC1Pressed()) {
+        // Aim on Right stick
+        limelightDriveSubsystem.aim(forward, driveSpeedCurrent);
       } else if (controllerMap.isLeftStickButtonC1Pressed()) {
-        // Aim on left-stick
-        limelightDriveSubsystem.aim(0.0);
+        // Range on Left Stick
+        limelightDriveSubsystem.range(50, rotation, driveSpeedCurrent);
       } else {
         // If not currently using a limelight action, drive normally
         driveSubsystem.drive(forward, rotation, driveSpeedCurrent);

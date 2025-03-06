@@ -21,6 +21,21 @@ public class LimelightMap {
         return tc;
     }
 
+// ----------------------------------------------------------------------------------------
+
+    public double getTA() {
+        return limelightTA;
+    } 
+    public double getTY() {
+        return limelightTY;
+    }
+    public double getTX() {
+        return limelightTX;
+    }
+    public double[] getPose() {
+        return robotPose;
+    }
+
     public double limelightAimProportional() {    
         // control the intensity of the robots movements: too high = oscilate, too low = not enough power to move
         double kP = 0.1;
