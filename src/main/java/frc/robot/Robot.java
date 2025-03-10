@@ -60,7 +60,10 @@ public class Robot extends TimedRobot {
   WPI_VictorSPX m_intake = new WPI_VictorSPX(8);
 
 
-  public Robot() {
+  public Robot() {}
+
+  @Override
+  public void robotInit() {
     // Create an instance of controllerMap and driveSubsystem
     controllerMap = new ControllerMap();
     driveSubsystem = new DriveSubsystem();
@@ -75,9 +78,9 @@ public class Robot extends TimedRobot {
     noteEndstop = new DigitalInput(0);
   
     // forward port 5800-5809 to the limelight (useful for USB control)
-    for (int port = 5800; port <= 5809; port++) {
-        PortForwarder.add(port, "limelight.local", port);
-    }
+    // for (int port = 5800; port <= 5809; port++) {
+    //     PortForwarder.add(port, "limelight.local", port);
+    // }
 
     SmartDashboard.getBoolean("Prevent Driver Control?", preventDrive);
     SmartDashboard.getBoolean("Use Joysticks to Drive?", useJoystickDrive);
@@ -153,6 +156,9 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
+    long currentTime = System.currentTimeMillis();
+    System.out.println("teleopPeriodic called at: " + currentTime);
+
     // Reset all the motors to 0 (They will be changed later in the cycle, so this is temporary.)
     double m_intakeSet = 0.0;
     double m_shooterSet = 0.0;
@@ -216,6 +222,7 @@ public class Robot extends TimedRobot {
 
 
 
+
     // Check to see if preventDrive is true: if it is, stop control to the drive motors
     if (!preventDrive) {
       // Arcadedrive the robot using the selected drive scheme
@@ -231,6 +238,10 @@ public class Robot extends TimedRobot {
         System.out.print("Strangely, a drive scheme could not be selected, or an error occured.");
       }
 
+      SmartDashboard.putNumber("Drive Forward Value", forward);
+      SmartDashboard.putNumber("Drive Rotation Value", rotation);
+      SmartDashboard.putNumber("Drive Speed", driveSpeedCurrent);
+
       if (controllerMap.isStartButtonC1Pressed()) {
         // Aim and Range on Start Button
         limelightDriveSubsystem.aimAndRange(40);
@@ -240,11 +251,16 @@ public class Robot extends TimedRobot {
       } else if (controllerMap.isLeftStickButtonC1Pressed()) {
         // Range on Left Stick
         limelightDriveSubsystem.range(50, rotation, driveSpeedCurrent);
-      } else {
+      } else if (!controllerMap.isLeftStickButtonC1Pressed() && !controllerMap.isRightStickButtonC1Pressed() && !controllerMap.isStartButtonC1Pressed()) {
         // If not currently using a limelight action, drive normally
-        driveSubsystem.drive(forward, rotation, driveSpeedCurrent);
-      }
+        // driveSubsystem.drive(forward, rotation, driveSpeedCurrent);
+        driveSubsystem.drive(0.5, 0.5, 1.0);
+        System.out.println("Driving with joysticks...");
+      } 
+    } else {
+      driveSubsystem.drive(0.5, 0.5, 1.0);
     }
+    System.out.println("Drive method has been called");
   }
 
   @Override

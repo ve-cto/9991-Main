@@ -23,6 +23,10 @@ public class DriveSubsystem {
 
         // group
         m_robotDrive = new DifferentialDrive(m_leftLeader, m_rightLeader);
+        m_robotDrive.setSafetyEnabled(true);
+        m_robotDrive.setExpiration(0.2); // Adjust timeout as needed
+
+        feed();
     }
 
     // Drive the robot.
@@ -35,6 +39,16 @@ public class DriveSubsystem {
     //  driveCurrentSpeed (Defined from controller triggers)
     // If you want absolute values, use the "Max" speed.
     public void drive(Double forward, Double rotation, Double speed) {
+        feed();
+        System.out.println("Drive method has been called: " +forward+rotation+speed);
         m_robotDrive.arcadeDrive(forward * speed, rotation * speed);
+    }
+
+    public void feed() {
+        System.out.println("Feed method has been called");
+        m_leftFollower.feed();
+        m_rightFollower.feed();
+        m_leftLeader.feed();
+        m_rightLeader.feed();
     }
 }
