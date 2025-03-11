@@ -3,13 +3,17 @@ package frc.robot.subsystems.maps;
 
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 
 public class ControllerMap {
-    private XboxController controller1;
-    private XboxController controller2;
+    public XboxController controller1;
+    public XboxController controller2;
     private Joystick joystick;
     private final double triggerThreshold = 0.5;
     private double axisValue;
+
+    public JoystickButton aButtonC1 = new JoystickButton(controller1, 0);
+    public JoystickButton bButtonC1 = new JoystickButton(controller1, 1);
 
 
     public ControllerMap() {

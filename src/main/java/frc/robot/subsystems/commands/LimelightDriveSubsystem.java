@@ -21,12 +21,12 @@ public class LimelightDriveSubsystem {
     public void range(double desiredArea, double rotation, double speed) {
         double forward = limelightMap.limelightRangeProportional(desiredArea);
 
-        driveSubsystem.drive(forward, rotation*speed, 1.0);
+        driveSubsystem.drive(rotation*speed, forward*speed, 1.0);
     }
 
     public void aim(double forward, double speed) {
         double rotation = limelightMap.limelightAimProportional();
 
-        driveSubsystem.drive(forward*speed, rotation, 1.0);
+        driveSubsystem.drive(rotation, forward*speed, 1.0);
     }
 }

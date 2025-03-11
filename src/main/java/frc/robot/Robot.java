@@ -236,7 +236,7 @@ public class Robot extends TimedRobot {
         limelightDriveSubsystem.aimAndRange(40);
       } else if (controllerMap.isRightStickButtonC1Pressed()) {
         // Aim on Right stick
-        limelightDriveSubsystem.aim(forward, driveSpeedCurrent);
+        limelightDriveSubsystem.aim(forward, 1);
       } else if (controllerMap.isLeftStickButtonC1Pressed()) {
         // Range on Left Stick
         limelightDriveSubsystem.range(50, rotation, driveSpeedCurrent);

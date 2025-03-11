@@ -45,8 +45,8 @@ public class LimelightMap {
         double targetDesiredRotationSpeed = mapRanges.MapTX(targetingAngleUnmapped) * kP;
 
         //invert since tx is positive when the target is to the right of the crosshair
-        targetDesiredRotationSpeed *= -1.0;
-
+        targetDesiredRotationSpeed = targetDesiredRotationSpeed*100;
+        System.out.print(targetDesiredRotationSpeed);
         return targetDesiredRotationSpeed;
     }
 

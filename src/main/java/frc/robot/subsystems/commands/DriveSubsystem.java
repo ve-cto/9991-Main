@@ -9,6 +9,7 @@ public class DriveSubsystem {
     private WPI_VictorSPX m_rightLeader;
     private WPI_VictorSPX m_rightFollower;
     private DifferentialDrive m_robotDrive;
+    private Double speed;
 
     public DriveSubsystem() {
         // Drive Motors
@@ -34,7 +35,12 @@ public class DriveSubsystem {
     //  driveMaxSpeed
     //  driveCurrentSpeed (Defined from controller triggers)
     // If you want absolute values, use the "Max" speed.
-    public void drive(Double forward, Double rotation, Double speed) {
-        m_robotDrive.arcadeDrive(forward * speed, rotation * speed);
+    public void drive(Double forward, Double rotation, Double desiredSpeed) {
+        this.speed = desiredSpeed;
+        m_robotDrive.arcadeDrive(forward * this.speed, rotation * this.speed);
+    }
+
+    public void setSpeed(Double desiredSpeed) {
+        this.speed = desiredSpeed;
     }
 }
