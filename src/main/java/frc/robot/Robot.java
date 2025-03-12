@@ -3,10 +3,8 @@ package frc.robot;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.TimedRobot;
 import frc.robot.subsystems.commands.DriveSubsystem;
-import frc.robot.subsystems.commands.LimelightDriveSubsystem;
 import frc.robot.subsystems.maps.ControllerMap;
 import frc.robot.subsystems.tools.MapRanges;
-import frc.robot.subsystems.maps.LimelightMap;
 
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 
@@ -36,8 +34,6 @@ public class Robot extends TimedRobot {
   private ControllerMap controllerMap;
   private DriveSubsystem driveSubsystem;
   private MapRanges mapRanges;
-  private LimelightDriveSubsystem limelightDriveSubsystem;
-  private LimelightMap limelightMap;
 
   private boolean preventDrive;
   private boolean useJoystickDrive;
@@ -68,8 +64,6 @@ public class Robot extends TimedRobot {
     controllerMap = new ControllerMap();
     driveSubsystem = new DriveSubsystem();
     mapRanges = new MapRanges();
-    limelightMap = new LimelightMap();
-    limelightDriveSubsystem = new LimelightDriveSubsystem();
 
     // set preventDrive to false on init
     this.preventDrive = false;
@@ -242,21 +236,8 @@ public class Robot extends TimedRobot {
       SmartDashboard.putNumber("Drive Rotation Value", rotation);
       SmartDashboard.putNumber("Drive Speed", driveSpeedCurrent);
 
-      if (controllerMap.isStartButtonC1Pressed()) {
-        // Aim and Range on Start Button
-        limelightDriveSubsystem.aimAndRange(40);
-      } else if (controllerMap.isRightStickButtonC1Pressed()) {
-        // Aim on Right stick
-        limelightDriveSubsystem.aim(forward, driveSpeedCurrent);
-      } else if (controllerMap.isLeftStickButtonC1Pressed()) {
-        // Range on Left Stick
-        limelightDriveSubsystem.range(50, rotation, driveSpeedCurrent);
-      } else if (!controllerMap.isLeftStickButtonC1Pressed() && !controllerMap.isRightStickButtonC1Pressed() && !controllerMap.isStartButtonC1Pressed()) {
-        // If not currently using a limelight action, drive normally
-        // driveSubsystem.drive(forward, rotation, driveSpeedCurrent);
-        driveSubsystem.drive(0.5, 0.5, 1.0);
-        System.out.println("Driving with joysticks...");
-      } 
+      
+      driveSubsystem.drive(forward, rotation, driveSpeedCurrent);
     } else {
       driveSubsystem.drive(0.5, 0.5, 1.0);
     }
