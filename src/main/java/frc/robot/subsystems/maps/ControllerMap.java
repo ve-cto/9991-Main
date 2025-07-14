@@ -61,6 +61,47 @@ public class ControllerMap {
         return controller1.getRightStickButton();
     }
 
+    public boolean isUpDPadC1Pressed() {
+        if (controller1.getPOV() == 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public boolean isRightDPadC1Pressed() {
+        if (controller1.getPOV() == 90) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+    public boolean isDownDPadC1Pressed() {
+        if (controller1.getPOV() == 180) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public boolean isLeftDPadC1Pressed() {
+        if (controller1.getPOV() == 270) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public boolean isNoDPadC1Pressed() {
+        if (controller1.getPOV() == -1) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
     // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     // Methods to check if the buttons on controller 2 are pressed

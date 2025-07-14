@@ -7,6 +7,7 @@ import frc.robot.subsystems.commands.LimelightDriveSubsystem;
 import frc.robot.subsystems.maps.ControllerMap;
 import frc.robot.subsystems.tools.MapRanges;
 import frc.robot.subsystems.maps.LimelightMap;
+import frc.robot.subsystems.commands.Elevator;
 
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 
@@ -24,8 +25,6 @@ public class Robot extends TimedRobot {
 
   private double m_intakeSet;
   private double m_shooterSet;
-  private double m_loaderSet;
-  private double m_climberSet;
   
   private static double driveSpeedSlow = 0.6;
   private static double driveSpeedNormal = 0.7;
@@ -38,6 +37,7 @@ public class Robot extends TimedRobot {
   private MapRanges mapRanges;
   private LimelightDriveSubsystem limelightDriveSubsystem;
   private LimelightMap limelightMap;
+  private Elevator elevator;
 
   private boolean preventDrive;
   private boolean useJoystickDrive;
@@ -55,8 +55,6 @@ public class Robot extends TimedRobot {
   private final SendableChooser<String> autoChooser = new SendableChooser<>();
   
   WPI_VictorSPX m_shooter = new WPI_VictorSPX(3);
-  WPI_VictorSPX m_loader = new WPI_VictorSPX(1);
-  WPI_VictorSPX m_climber = new WPI_VictorSPX(2);
   WPI_VictorSPX m_intake = new WPI_VictorSPX(8);
 
 
@@ -70,17 +68,11 @@ public class Robot extends TimedRobot {
     mapRanges = new MapRanges();
     limelightMap = new LimelightMap();
     limelightDriveSubsystem = new LimelightDriveSubsystem();
+    elevator = new Elevator();
 
     // set preventDrive to false on init
     this.preventDrive = false;
-
-    // setup the endstop
-    noteEndstop = new DigitalInput(0);
   
-    // forward port 5800-5809 to the limelight (useful for USB control)
-    // for (int port = 5800; port <= 5809; port++) {
-    //     PortForwarder.add(port, "limelight.local", port);
-    // }
 
     SmartDashboard.getBoolean("Prevent Driver Control?", preventDrive);
     SmartDashboard.getBoolean("Use Joysticks to Drive?", useJoystickDrive);
@@ -93,34 +85,18 @@ public class Robot extends TimedRobot {
     driveSchemeChooser.addOption("Dual-Controller Control", driveSchemeDual);
     driveSchemeChooser.addOption("Joystick Control", driveSchemeJoystick);
     SmartDashboard.putData("selectedDriveMode", driveSchemeChooser);
+
+    elevator.reset();
   }
 
   @Override
   public void robotPeriodic() {
-    // Display the applied output of the left and right side onto the dashboard
-    // SmartDashboard.putNumber("Left Out", m_leftLeader.getAppliedOutput());
-    // SmartDashboard.putNumber("Right Out", m_rightLeader.getAppliedOutput());
-
-    boolean noteEndstopStatus = noteEndstop.get();
-    SmartDashboard.putBoolean("Note Endstop Status", noteEndstopStatus);
-
     SmartDashboard.putNumber("Current Speed", driveSpeedCurrent);
 
-    
-    // SmartDashboard.putNumber("Axis 0", controllerMap.getJoystickAxes(0));
-    // SmartDashboard.putNumber("Axis 1", controllerMap.getJoystickAxes(1));
-    // SmartDashboard.putNumber("Axis 2", controllerMap.getJoystickAxes(2));
-    // SmartDashboard.putNumber("Axis 3", controllerMap.getJoystickAxes(3));
-    // SmartDashboard.putNumber("Axis 4", controllerMap.getJoystickAxes(4));
-    // SmartDashboard.putNumber("Axis Count", controllerMap.getAxisCount());
-
-    // double limelightTA = limelightMap.getTA();
-    // double limelightTX = limelightMap.getTX();
-    // double limelightTY = limelightMap.getTY();
-
-    // SmartDashboard.putNumber("Limelight TA", limelightTA);
-    // SmartDashboard.putNumber("Limelight TX", limelightTX);
-    // SmartDashboard.putNumber("Limelight TY", limelightTY);
+    SmartDashboard.putString("Current Elevator Position", elevator.getPosition().toString());
+    SmartDashboard.putNumber("Current Elevator Height", elevator.getHeight());
+    SmartDashboard.putString("Elevator ranging towards:", elevator.getTargetPosition().toString());
+    SmartDashboard.putBoolean("Elevator Endstop", elevator.getEndstop());
   }
 
   @Override
@@ -147,8 +123,6 @@ public class Robot extends TimedRobot {
     // Reset all the motors to 0, after auto is completed
     this.m_intakeSet = 0.0;
     this.m_shooterSet = 0.0;
-    this.m_loaderSet = 0.0;
-    this.m_climberSet = 0.0;
 
     driveSchemeSelected = driveSchemeChooser.getSelected();
     SmartDashboard.putString("Current drive scheme:", DRIVE_SCHEME_STRINGS[driveSchemeSelected]);
@@ -156,47 +130,31 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
-    long currentTime = System.currentTimeMillis();
-    System.out.println("teleopPeriodic called at: " + currentTime);
-
     // Reset all the motors to 0 (They will be changed later in the cycle, so this is temporary.)
     double m_intakeSet = 0.0;
     double m_shooterSet = 0.0;
-    double m_loaderSet = 0.0;
-    double m_climberSet = 0.0;
-    double forward;
-    double rotation;
+    double forward = 0.0;
+    double rotation = 0.0;
     driveSpeedCurrent = driveSpeedNormal;
 
 
-    // Handle Buttons
-    if (controllerMap.isAButtonC1Pressed() && !controllerMap.isBButtonC1Pressed()) {
-      // A button is pressed, but not B button (Spin up shooter)
-      m_shooterSet = 1.0;
-    } else if (controllerMap.isBButtonC1Pressed() && controllerMap.isAButtonC1Pressed()) {
-      // B button AND a button is pressed (Full shoot)
-      m_shooterSet = 1.0;
-      m_intakeSet = -0.7;
-      m_loaderSet = 1.0;
-    } else if (controllerMap.isXButtonC1Pressed() && !controllerMap.isAButtonC1Pressed() && !controllerMap.isYButtonC1Pressed()) {
-    // X button is pressed, but not A or Y (prevent override of variable) (suck in note)
-      m_shooterSet = -0.5;
-      m_loaderSet = -0.5;
-    } else if (controllerMap.isYButtonC1Pressed() && !controllerMap.isAButtonC1Pressed() && !controllerMap.isXButtonC1Pressed()) {
-    // Y button is pressed, but not A, Y or X (drop into amp)
-      m_shooterSet = -0.4;
-      m_loaderSet = -0.4;
-      m_intakeSet = -0.3;
+    if (controllerMap.isLeftDPadC1Pressed()) {
+      elevator.gotoL1();
+    } else if (controllerMap.isUpDPadC1Pressed()) {
+      elevator.gotoL2();
+    } else if (controllerMap.isRightDPadC1Pressed()) {
+      elevator.gotoL3();
+    } else if (controllerMap.isDownDPadC1Pressed()) {
+      elevator.gotoL0();
+    } else if (controllerMap.isNoDPadC1Pressed()) {
+      elevator.home();
+    } else {
+      elevator.feed();
     }
 
-    // Handle Bumpers
-    // Left Bumper (Eject)
-    if (controllerMap.isLeftBumperC1Pressed() && !controllerMap.isBButtonC1Pressed() && !controllerMap.isYButtonC1Pressed() && !controllerMap.isRightBumperC1Pressed()) {
-      m_intakeSet = 0.6;
-    // Right Bumper (Intake until endstop)
-    } else if (controllerMap.isRightBumperC1Pressed() && !controllerMap.isBButtonC1Pressed() && !controllerMap.isYButtonC1Pressed() && !controllerMap.isLeftBumperC1Pressed() && !noteEndstop.get()) {
-      m_intakeSet = -0.6;
-    }
+
+
+
 
     // Handle Triggers
     if (controllerMap.isLeftTriggerC1Pressed() && !controllerMap.isRightTriggerC1Pressed()) {
@@ -211,14 +169,10 @@ public class Robot extends TimedRobot {
     // Take the desired motor values, and push them to this. This forces them to reset at the end of an auto, and means that they are public and accessible in other classes
     this.m_shooterSet = m_shooterSet;
     this.m_intakeSet = m_intakeSet;
-    this.m_loaderSet = m_loaderSet;
-    this.m_climberSet = m_climberSet;
 
     // Set the motors to their values in the main class.
     m_shooter.set(this.m_shooterSet);
     m_intake.set(this.m_intakeSet);
-    m_loader.set(this.m_loaderSet);
-    m_climber.set(this.m_climberSet);
 
 
 
@@ -242,25 +196,26 @@ public class Robot extends TimedRobot {
       SmartDashboard.putNumber("Drive Rotation Value", rotation);
       SmartDashboard.putNumber("Drive Speed", driveSpeedCurrent);
 
-      if (controllerMap.isStartButtonC1Pressed()) {
-        // Aim and Range on Start Button
-        limelightDriveSubsystem.aimAndRange(40);
-      } else if (controllerMap.isRightStickButtonC1Pressed()) {
-        // Aim on Right stick
-        limelightDriveSubsystem.aim(forward, driveSpeedCurrent);
-      } else if (controllerMap.isLeftStickButtonC1Pressed()) {
-        // Range on Left Stick
-        limelightDriveSubsystem.range(50, rotation, driveSpeedCurrent);
-      } else if (!controllerMap.isLeftStickButtonC1Pressed() && !controllerMap.isRightStickButtonC1Pressed() && !controllerMap.isStartButtonC1Pressed()) {
-        // If not currently using a limelight action, drive normally
-        // driveSubsystem.drive(forward, rotation, driveSpeedCurrent);
-        driveSubsystem.drive(0.5, 0.5, 1.0);
-        System.out.println("Driving with joysticks...");
-      } 
+      // if (controllerMap.isStartButtonC1Pressed()) {
+      //   // Aim and Range on Start Button
+      //   limelightDriveSubsystem.aimAndRange(40);
+      // } else if (controllerMap.isRightStickButtonC1Pressed()) {
+      //   // Aim on Right stick
+      //   limelightDriveSubsystem.aim(forward, driveSpeedCurrent);
+      // } else if (controllerMap.isLeftStickButtonC1Pressed()) {
+      //   // Range on Left Stick
+      //   limelightDriveSubsystem.range(50, rotation, driveSpeedCurrent);
+      // } else if (!controllerMap.isLeftStickButtonC1Pressed() && !controllerMap.isRightStickButtonC1Pressed() && !controllerMap.isStartButtonC1Pressed()) {
+      //   // If not currently using a limelight action, drive normally
+      //   driveSubsystem.drive(forward, rotation, driveSpeedCurrent);
+      //   System.out.println("Driving with joysticks...");
+      // } 
+
+      driveSubsystem.drive(forward, rotation, driveSpeedCurrent);
     } else {
-      driveSubsystem.drive(0.5, 0.5, 1.0);
+      driveSubsystem.drive(0.0, 0.0, 0.0);
     }
-    System.out.println("Drive method has been called");
+    // System.out.println("Drive method has been called");
   }
 
   @Override
