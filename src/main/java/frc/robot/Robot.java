@@ -22,11 +22,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * this project, you must also update the manifest file in the resource directory.
  */
 public class Robot extends TimedRobot {
-  private static double driveSpeedSlow = 0.6;
-  private static double driveSpeedNormal = 0.7;
-  private static double driveSpeedFast = 0.8;
-  private static double driveSpeedMax = 1.0;
   private double driveSpeedCurrent;
+  private double forward;
+  private double rotation;
 
   private ControllerMap controllerMap;
   private DriveSubsystem driveSubsystem;
@@ -62,6 +60,7 @@ public class Robot extends TimedRobot {
     limelightMap = new LimelightMap();
     limelightDriveSubsystem = new LimelightDriveSubsystem();
     elevator = new Elevator();
+    endEffector = new EndEffector();
 
     // set preventDrive to false on init
     this.preventDrive = false;
@@ -93,6 +92,9 @@ public class Robot extends TimedRobot {
 
     SmartDashboard.putString("Intake Status", endEffector.getCoralState());
     SmartDashboard.putBoolean("Coral Loaded?", endEffector.getCoralLoaded());
+
+    SmartDashboard.putNumber("Drive Forward Value", forward);
+    SmartDashboard.putNumber("Drive Rotation Value", rotation);
   }
 
   @Override
@@ -125,7 +127,7 @@ public class Robot extends TimedRobot {
     // Reset the driving vars
     double forward = 0.0;
     double rotation = 0.0;
-    driveSpeedCurrent = driveSpeedNormal;
+    driveSpeedCurrent = Constants.Robot.driveSpeedNormal;
 
 
     // -------------------------------------------------------------------------------------------------------
@@ -151,6 +153,8 @@ public class Robot extends TimedRobot {
     // -------------------------------------------------------------------------------------------------------
     if (controllerMap.isAButtonC1Pressed()) {
       endEffector.intakeCoral();
+    } else if (controllerMap.isBButtonC1Pressed()) {
+      endEffector.releaseCoral();
     }
 
 
@@ -159,52 +163,50 @@ public class Robot extends TimedRobot {
     // -------------------------------------------------------------------------------------------------------
     // Handle Triggers for Drive Speed
     if (controllerMap.isLeftTriggerC1Pressed() && !controllerMap.isRightTriggerC1Pressed()) {
-      driveSpeedCurrent = driveSpeedSlow;
+      driveSpeedCurrent = Constants.Robot.driveSpeedSlow;
     } else if (controllerMap.isRightTriggerC1Pressed() && !controllerMap.isLeftTriggerC1Pressed()) {
-      driveSpeedCurrent = driveSpeedFast;
+      driveSpeedCurrent = Constants.Robot.driveSpeedFast;
     } else if (controllerMap.isLeftTriggerC1Pressed() && controllerMap.isRightTriggerC1Pressed()) {
       // If both of the triggers are held at the same time, max the motors.
-      driveSpeedCurrent = driveSpeedMax;
+      driveSpeedCurrent = Constants.Robot.driveSpeedMax;
     }
 
-    // Check to see if preventDrive is true: if it is, stop control to the drive motors
-    if (!preventDrive) {
-      // Arcadedrive the robot using the selected drive scheme
-      if (driveSchemeSelected == 0 || driveSchemeSelected == 1) {
-        forward = controllerMap.getRightXC1();
-        rotation = -controllerMap.getLeftYC1();
-      } else if (driveSchemeSelected == 2) {
-        forward = controllerMap.getJoystickAxes(0);
-        rotation = controllerMap.getJoystickAxes(1);
-      } else {
-        forward = 0;
-        rotation = 0;
-        System.out.print("Strangely, a drive scheme could not be selected, and an error occured.");
-      }
-
-      SmartDashboard.putNumber("Drive Forward Value", forward);
-      SmartDashboard.putNumber("Drive Rotation Value", rotation);
-      SmartDashboard.putNumber("Drive Speed", driveSpeedCurrent);
-
-      // if (controllerMap.isStartButtonC1Pressed()) {
-      //   // Aim and Range on Start Button
-      //   limelightDriveSubsystem.aimAndRange(40);
-      // } else if (controllerMap.isRightStickButtonC1Pressed()) {
-      //   // Aim on Right stick
-      //   limelightDriveSubsystem.aim(forward, driveSpeedCurrent);
-      // } else if (controllerMap.isLeftStickButtonC1Pressed()) {
-      //   // Range on Left Stick
-      //   limelightDriveSubsystem.range(50, rotation, driveSpeedCurrent);
-      // } else if (!controllerMap.isLeftStickButtonC1Pressed() && !controllerMap.isRightStickButtonC1Pressed() && !controllerMap.isStartButtonC1Pressed()) {
-      //   // If not currently using a limelight action, drive normally
-      //   driveSubsystem.drive(forward, rotation, driveSpeedCurrent);
-      //   System.out.println("Driving with joysticks...");
-      // } 
-
-      driveSubsystem.drive(forward, rotation, driveSpeedCurrent);
+    // Arcadedrive the robot using the selected drive scheme
+    if (driveSchemeSelected == 0) {
+      forward = controllerMap.getRightXC1();
+      rotation = -controllerMap.getLeftYC1();
+    } else if (driveSchemeSelected == 1) {
+      forward = controllerMap.getRightXC2();
+      rotation = -controllerMap.getLeftYC2();
+    } else if (driveSchemeSelected == 2) {
+      forward = controllerMap.getJoystickAxes(0);
+      rotation = controllerMap.getJoystickAxes(1);
     } else {
-      driveSubsystem.drive(0.0, 0.0, 1.0);
+      forward = 0;
+      rotation = 0;
+      System.out.print("Strangely, a drive scheme could not be selected, and an error occured.");
     }
+
+    
+
+    // if (controllerMap.isStartButtonC1Pressed()) {
+    //   // Aim and Range on Start Button
+    //   limelightDriveSubsystem.aimAndRange(40);
+    // } else if (controllerMap.isRightStickButtonC1Pressed()) {
+    //   // Aim on Right stick
+    //   limelightDriveSubsystem.aim(forward, driveSpeedCurrent);
+    // } else if (controllerMap.isLeftStickButtonC1Pressed()) {
+    //   // Range on Left Stick
+    //   limelightDriveSubsystem.range(50, rotation, driveSpeedCurrent);
+    // } else if (!controllerMap.isLeftStickButtonC1Pressed() && !controllerMap.isRightStickButtonC1Pressed() && !controllerMap.isStartButtonC1Pressed()) {
+    //   // If not currently using a limelight action, drive normally
+    //   driveSubsystem.drive(forward, rotation, driveSpeedCurrent);
+    //   System.out.println("Driving with joysticks...");
+    // } 
+
+    this.forward = forward;
+    this.rotation = rotation;
+    driveSubsystem.drive(forward, rotation, driveSpeedCurrent);
   }
 
   @Override

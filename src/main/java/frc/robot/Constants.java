@@ -2,14 +2,17 @@ package frc.robot;
 
 public class Constants {
     public static class Robot {
-
+        public static double driveSpeedSlow = 0.6;
+        public static double driveSpeedNormal = 0.7;
+        public static double driveSpeedFast = 0.8;
+        public static double driveSpeedMax = 1.0;
     }
 
     public static class Elevator {
         public static final int sEncoderID1 = 0;
-        public static final int sEncoderID2 = 0;
+        public static final int sEncoderID2 = 1;
 
-        public static final int sEndstopID = 0;
+        public static final int sEndstopID = 2;
 
         public static final int m_elevatorLeftID = 0;
         public static final int m_elevatorRightID = 0;
@@ -21,8 +24,8 @@ public class Constants {
     }
 
     public static class EndEffector {
-        public static final int s_break1ID = 0;
-        public static final int s_break2ID = 0;
+        public static final int s_break1ID = 3;
+        public static final int s_break2ID = 4;
 
         public static final int m_intakeID = 0;
     }

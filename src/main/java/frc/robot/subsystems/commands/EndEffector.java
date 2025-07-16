@@ -20,6 +20,8 @@ public class EndEffector {
 
         s_break1 = new DigitalInput(Constants.EndEffector.s_break1ID);
         s_break2 = new DigitalInput(Constants.EndEffector.s_break2ID);
+        isCoralLoaded = false;
+        isCoralPastStage1 = false;
     }
 
     public boolean getCoralLoaded() {
@@ -46,6 +48,14 @@ public class EndEffector {
             m_intake.set(0.2);
         } else {
             m_intake.set(0.0);
+        }
+    }
+
+    public void releaseCoral() {
+        if (isCoralLoaded == true) {
+            m_intake.set(0.3);
+        } else {
+            intakeCoral();
         }
     }
 }

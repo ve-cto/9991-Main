@@ -78,7 +78,7 @@ public class Elevator {
 
     public void home() {
         targetPosition = pos.HOME;
-        if (!s_endstop.get()) {
+        if (s_endstop.get()) {
             m_elevatorLeft.set(-0.1);
         } else {
             m_elevatorLeft.set(0.0);
