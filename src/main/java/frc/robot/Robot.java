@@ -8,10 +8,11 @@ import frc.robot.subsystems.maps.ControllerMap;
 import frc.robot.subsystems.tools.MapRanges;
 import frc.robot.subsystems.maps.LimelightMap;
 import frc.robot.subsystems.commands.Elevator;
+import frc.robot.subsystems.commands.EndEffector;
 
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 
-import edu.wpi.first.net.PortForwarder;
+// import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -21,11 +22,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * this project, you must also update the manifest file in the resource directory.
  */
 public class Robot extends TimedRobot {
-  private DigitalInput noteEndstop;
-
-  private double m_intakeSet;
-  private double m_shooterSet;
-  
   private static double driveSpeedSlow = 0.6;
   private static double driveSpeedNormal = 0.7;
   private static double driveSpeedFast = 0.8;
@@ -38,6 +34,7 @@ public class Robot extends TimedRobot {
   private LimelightDriveSubsystem limelightDriveSubsystem;
   private LimelightMap limelightMap;
   private Elevator elevator;
+  private EndEffector endEffector;
 
   private boolean preventDrive;
   private boolean useJoystickDrive;
@@ -53,10 +50,6 @@ public class Robot extends TimedRobot {
   private static final String autoCustom1 = "Custom1";
   private String autoSelected;
   private final SendableChooser<String> autoChooser = new SendableChooser<>();
-  
-  WPI_VictorSPX m_shooter = new WPI_VictorSPX(3);
-  WPI_VictorSPX m_intake = new WPI_VictorSPX(8);
-
 
   public Robot() {}
 
@@ -97,6 +90,9 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("Current Elevator Height", elevator.getHeight());
     SmartDashboard.putString("Elevator ranging towards:", elevator.getTargetPosition().toString());
     SmartDashboard.putBoolean("Elevator Endstop", elevator.getEndstop());
+
+    SmartDashboard.putString("Intake Status", endEffector.getCoralState());
+    SmartDashboard.putBoolean("Coral Loaded?", endEffector.getCoralLoaded());
   }
 
   @Override
@@ -120,24 +116,21 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
-    // Reset all the motors to 0, after auto is completed
-    this.m_intakeSet = 0.0;
-    this.m_shooterSet = 0.0;
-
     driveSchemeSelected = driveSchemeChooser.getSelected();
     SmartDashboard.putString("Current drive scheme:", DRIVE_SCHEME_STRINGS[driveSchemeSelected]);
   }
 
   @Override
   public void teleopPeriodic() {
-    // Reset all the motors to 0 (They will be changed later in the cycle, so this is temporary.)
-    double m_intakeSet = 0.0;
-    double m_shooterSet = 0.0;
+    // Reset the driving vars
     double forward = 0.0;
     double rotation = 0.0;
     driveSpeedCurrent = driveSpeedNormal;
 
 
+    // -------------------------------------------------------------------------------------------------------
+    // ELEVATOR
+    // -------------------------------------------------------------------------------------------------------
     if (controllerMap.isLeftDPadC1Pressed()) {
       elevator.gotoL1();
     } else if (controllerMap.isUpDPadC1Pressed()) {
@@ -149,14 +142,22 @@ public class Robot extends TimedRobot {
     } else if (controllerMap.isNoDPadC1Pressed()) {
       elevator.home();
     } else {
-      elevator.feed();
+      elevator.home();
+    }
+
+    
+    // -------------------------------------------------------------------------------------------------------
+    // END EFFECTOR
+    // -------------------------------------------------------------------------------------------------------
+    if (controllerMap.isAButtonC1Pressed()) {
+      endEffector.intakeCoral();
     }
 
 
-
-
-
-    // Handle Triggers
+    // -------------------------------------------------------------------------------------------------------
+    // DRIVE
+    // -------------------------------------------------------------------------------------------------------
+    // Handle Triggers for Drive Speed
     if (controllerMap.isLeftTriggerC1Pressed() && !controllerMap.isRightTriggerC1Pressed()) {
       driveSpeedCurrent = driveSpeedSlow;
     } else if (controllerMap.isRightTriggerC1Pressed() && !controllerMap.isLeftTriggerC1Pressed()) {
@@ -165,17 +166,6 @@ public class Robot extends TimedRobot {
       // If both of the triggers are held at the same time, max the motors.
       driveSpeedCurrent = driveSpeedMax;
     }
-
-    // Take the desired motor values, and push them to this. This forces them to reset at the end of an auto, and means that they are public and accessible in other classes
-    this.m_shooterSet = m_shooterSet;
-    this.m_intakeSet = m_intakeSet;
-
-    // Set the motors to their values in the main class.
-    m_shooter.set(this.m_shooterSet);
-    m_intake.set(this.m_intakeSet);
-
-
-
 
     // Check to see if preventDrive is true: if it is, stop control to the drive motors
     if (!preventDrive) {
@@ -189,7 +179,7 @@ public class Robot extends TimedRobot {
       } else {
         forward = 0;
         rotation = 0;
-        System.out.print("Strangely, a drive scheme could not be selected, or an error occured.");
+        System.out.print("Strangely, a drive scheme could not be selected, and an error occured.");
       }
 
       SmartDashboard.putNumber("Drive Forward Value", forward);
@@ -213,9 +203,8 @@ public class Robot extends TimedRobot {
 
       driveSubsystem.drive(forward, rotation, driveSpeedCurrent);
     } else {
-      driveSubsystem.drive(0.0, 0.0, 0.0);
+      driveSubsystem.drive(0.0, 0.0, 1.0);
     }
-    // System.out.println("Drive method has been called");
   }
 
   @Override

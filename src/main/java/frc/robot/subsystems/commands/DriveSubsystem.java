@@ -2,6 +2,7 @@ package frc.robot.subsystems.commands;
 
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import frc.robot.Constants;
 
 public class DriveSubsystem {
     private WPI_VictorSPX m_leftLeader;
@@ -12,10 +13,10 @@ public class DriveSubsystem {
 
     public DriveSubsystem() {
         // Drive Motors
-        m_rightLeader = new WPI_VictorSPX(4);
-        m_rightFollower = new WPI_VictorSPX(5);
-        m_leftLeader = new WPI_VictorSPX(6);
-        m_leftFollower = new WPI_VictorSPX(7);
+        m_rightLeader = new WPI_VictorSPX(Constants.Drive.m_driveFRID);
+        m_rightFollower = new WPI_VictorSPX(Constants.Drive.m_driveBRID);
+        m_leftLeader = new WPI_VictorSPX(Constants.Drive.m_driveFLID);
+        m_leftFollower = new WPI_VictorSPX(Constants.Drive.m_driveBLID);
 
         // Set followers
         m_rightFollower.follow(m_rightLeader);
@@ -38,8 +39,10 @@ public class DriveSubsystem {
     // If you want absolute values, use the "Max" speed.
     public void drive(Double forward, Double rotation, Double speed) {
         // System.out.println("Drive method has been called: " +forward+rotation+speed);
-        m_robotDrive.arcadeDrive(forward * speed, rotation * speed);
-        feed();
+        forward = Math.min(Math.max(forward * speed, -1.0), 1.0);
+        rotation = Math.min(Math.max(rotation * speed, -1.0), 1.0);
+
+        m_robotDrive.arcadeDrive(forward, rotation);
     }
 
     public void feed() {

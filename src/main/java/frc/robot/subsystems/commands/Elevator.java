@@ -4,12 +4,12 @@ import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.Encoder;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.Constants;
 import edu.wpi.first.wpilibj.DigitalInput;
 
 public class Elevator {
-    private WPI_VictorSPX m_leftLeader;
-    private WPI_VictorSPX m_rightFollower;
+    private WPI_VictorSPX m_elevatorLeft;
+    private WPI_VictorSPX m_elevatorRight;
     private Encoder s_encoder;
     private final PIDController pid;        
     private DigitalInput s_endstop;
@@ -32,18 +32,19 @@ public class Elevator {
 
 
     public Elevator() {
-        s_encoder = new Encoder(0, 1, false, Encoder.EncodingType.k2X);
+        s_encoder = new Encoder(Constants.Elevator.sEncoderID1, Constants.Elevator.sEncoderID2, false, Encoder.EncodingType.k2X);
         s_encoder.setSamplesToAverage(3);
 
-        s_endstop = new DigitalInput(2);
+        s_endstop = new DigitalInput(Constants.Elevator.sEndstopID);
 
-        m_rightFollower = new WPI_VictorSPX(4);
-        m_leftLeader = new WPI_VictorSPX(5);
+        m_elevatorRight = new WPI_VictorSPX(Constants.Elevator.m_elevatorRightID);
+        m_elevatorLeft = new WPI_VictorSPX(Constants.Elevator.m_elevatorLeftID);
 
-        m_rightFollower.follow(m_leftLeader);
+        m_elevatorRight.follow(m_elevatorLeft);
+        m_elevatorRight.setInverted(true);
         
-        m_leftLeader.setSafetyEnabled(true);
-        m_rightFollower.setSafetyEnabled(true);
+        m_elevatorLeft.setSafetyEnabled(true);
+        m_elevatorRight.setSafetyEnabled(true);
 
         // PID values need tuning for your specific elevator
         pid = new PIDController(0.1, 0, 0);
@@ -72,15 +73,15 @@ public class Elevator {
     public void reset() {
         s_encoder.reset();
         lastKnownPosition = pos.UNKNOWN;
-        m_leftLeader.set(0.0);
+        m_elevatorLeft.set(0.0);
     } 
 
     public void home() {
         targetPosition = pos.HOME;
         if (!s_endstop.get()) {
-            m_leftLeader.set(-0.1);
+            m_elevatorLeft.set(-0.1);
         } else {
-            m_leftLeader.set(0.0);
+            m_elevatorLeft.set(0.0);
             s_encoder.reset();
             lastKnownPosition = pos.HOME;
         }
@@ -88,8 +89,8 @@ public class Elevator {
     }
 
     public void feed() {
-        m_leftLeader.feed();
-        m_rightFollower.feed();
+        m_elevatorLeft.feed();
+        m_elevatorRight.feed();
     }
 
     public void gotoL0() {
@@ -150,6 +151,6 @@ public class Elevator {
         // Clamp the output to valid range
         motorOutput = Math.min(Math.max(motorOutput, -1.0), 1.0);
         
-        m_leftLeader.set(motorOutput);  
+        m_elevatorLeft.set(motorOutput);  
     }
 }
