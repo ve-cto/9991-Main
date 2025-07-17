@@ -1,6 +1,5 @@
 package frc.robot;
 
-import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.TimedRobot;
 import frc.robot.subsystems.commands.DriveSubsystem;
 import frc.robot.subsystems.commands.LimelightDriveSubsystem;
@@ -9,8 +8,6 @@ import frc.robot.subsystems.tools.MapRanges;
 import frc.robot.subsystems.maps.LimelightMap;
 import frc.robot.subsystems.commands.Elevator;
 import frc.robot.subsystems.commands.EndEffector;
-
-import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 
 // import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -95,6 +92,8 @@ public class Robot extends TimedRobot {
 
     SmartDashboard.putNumber("Drive Forward Value", forward);
     SmartDashboard.putNumber("Drive Rotation Value", rotation);
+
+    SmartDashboard.putNumber("Encoder Distance", elevator.getHeightUnform());
   }
 
   @Override
@@ -120,6 +119,7 @@ public class Robot extends TimedRobot {
   public void teleopInit() {
     driveSchemeSelected = driveSchemeChooser.getSelected();
     SmartDashboard.putString("Current drive scheme:", DRIVE_SCHEME_STRINGS[driveSchemeSelected]);
+    elevator.reset();
   }
 
   @Override
@@ -133,28 +133,40 @@ public class Robot extends TimedRobot {
     // -------------------------------------------------------------------------------------------------------
     // ELEVATOR
     // -------------------------------------------------------------------------------------------------------
-    if (controllerMap.isLeftDPadC1Pressed()) {
-      elevator.gotoL1();
-    } else if (controllerMap.isUpDPadC1Pressed()) {
-      elevator.gotoL2();
-    } else if (controllerMap.isRightDPadC1Pressed()) {
-      elevator.gotoL3();
-    } else if (controllerMap.isDownDPadC1Pressed()) {
-      elevator.gotoL0();
-    } else if (controllerMap.isNoDPadC1Pressed()) {
-      elevator.home();
-    } else {
-      elevator.home();
-    }
+    // if (controllerMap.isLeftDPadC1Pressed()) {
+    //   elevator.gotoL1();
+    // } else if (controllerMap.isUpDPadC1Pressed()) {
+    //   elevator.gotoL2();
+    // } else if (controllerMap.isRightDPadC1Pressed()) {
+    //   elevator.gotoL3();
+    // } else if (controllerMap.isDownDPadC1Pressed()) {
+    //   elevator.gotoL0();
+    // } else if (controllerMap.isNoDPadC1Pressed()) {
+    //   elevator.stop();
+    //   // elevator.feed();
+    // } else {
+    //   elevator.stop();
+    // }
 
+    if (controllerMap.isUpDPadC1Pressed()) {
+      elevator.manualShift(-0.4);
+    } else if (controllerMap.isDownDPadC1Pressed()) {
+      elevator.manualShift(0.0);
+    } else {
+      elevator.manualShift(-0.15);
+    }
     
     // -------------------------------------------------------------------------------------------------------
     // END EFFECTOR
     // -------------------------------------------------------------------------------------------------------
     if (controllerMap.isAButtonC1Pressed()) {
-      endEffector.intakeCoral();
+      // endEffector.intakeCoral();
+      endEffector.manualShift(0.4);
     } else if (controllerMap.isBButtonC1Pressed()) {
-      endEffector.releaseCoral();
+      // endEffector.releaseCoral();
+      endEffector.manualShift(-0.4);
+    } else {
+      endEffector.stop();
     }
 
 

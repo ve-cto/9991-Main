@@ -16,8 +16,8 @@ public class Elevator {
     private double desiredHeight;
 
     // You'll need to adjust these based on your elevator's specifications
-    private final double COUNTS_PER_INCH = 42.0; // Example value - measure this!
-    private final double GRAVITY_COMPENSATION = 0.1; // Tune this value - usually between 0.05-0.2
+    private final double COUNTS_PER_INCH = 470.0; // Example value - measure this!
+    private final double GRAVITY_COMPENSATION = 0.15; // Tune this value - usually between 0.05-0.2
     
     public enum pos {
         HOME,
@@ -40,8 +40,8 @@ public class Elevator {
         m_elevatorRight = new WPI_VictorSPX(Constants.Elevator.m_elevatorRightID);
         m_elevatorLeft = new WPI_VictorSPX(Constants.Elevator.m_elevatorLeftID);
 
-        m_elevatorRight.follow(m_elevatorLeft);
         m_elevatorRight.setInverted(true);
+        // m_elevatorRight.follow(m_elevatorLeft);
         
         m_elevatorLeft.setSafetyEnabled(true);
         m_elevatorRight.setSafetyEnabled(true);
@@ -52,6 +52,10 @@ public class Elevator {
 
     public double getHeight() {
         return s_encoder.getDistance() / COUNTS_PER_INCH;
+    }
+
+    public double getHeightUnform() {
+        return s_encoder.getDistance();
     }
 
     public pos getPosition() {
@@ -93,6 +97,11 @@ public class Elevator {
         m_elevatorRight.feed();
     }
 
+    public void stop() {
+        m_elevatorLeft.set(-0.1);
+        m_elevatorRight.set(-0.1);
+    }
+
     public void gotoL0() {
         if (lastKnownPosition != pos.UNKNOWN && lastKnownPosition != pos.L0) {
             setPosition(pos.L0);
@@ -128,17 +137,17 @@ public class Elevator {
     public void setPosition(pos targetHeight) {
         switch(targetHeight) {
             case HOME:
-                desiredHeight = 0.0;
+                desiredHeight = 0.1;
             case UNKNOWN:
                 break;
             case L0:
-                desiredHeight = 8;
+                desiredHeight = 5;
             case L1:
-                desiredHeight = 10;
+                desiredHeight = 7;
             case L2:
-                desiredHeight = 12;
+                desiredHeight = 9;
             case L3:
-                desiredHeight = 14;
+                desiredHeight = 11;
         }
 
         double pidOutput = pid.calculate(getHeight(), desiredHeight);
@@ -151,6 +160,12 @@ public class Elevator {
         // Clamp the output to valid range
         motorOutput = Math.min(Math.max(motorOutput, -1.0), 1.0);
         
-        m_elevatorLeft.set(motorOutput);  
+        m_elevatorLeft.set(-motorOutput);  
+        m_elevatorRight.set(-motorOutput);
+    }
+
+    public void manualShift(double speed) {
+        m_elevatorLeft.set(speed);
+        m_elevatorRight.set(speed);
     }
 }

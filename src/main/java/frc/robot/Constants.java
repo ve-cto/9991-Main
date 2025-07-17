@@ -14,8 +14,10 @@ public class Constants {
 
         public static final int sEndstopID = 2;
 
-        public static final int m_elevatorLeftID = 0;
-        public static final int m_elevatorRightID = 0;
+        public static final int m_elevatorLeftID = 4;
+        public static final int m_elevatorRightID = 5;
+
+        public static final double gravityComp = -0.15;
     }
 
     public static class Algae {
@@ -27,7 +29,8 @@ public class Constants {
         public static final int s_break1ID = 3;
         public static final int s_break2ID = 4;
 
-        public static final int m_intakeID = 0;
+        public static final int m_intake1ID = 7;
+        public static final int m_intake2ID = 6;
     }
 
     public static class Drive {

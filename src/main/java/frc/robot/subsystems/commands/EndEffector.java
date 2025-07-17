@@ -8,7 +8,8 @@ import frc.robot.Constants;
 import edu.wpi.first.wpilibj.DigitalInput;
 
 public class EndEffector {
-    private WPI_VictorSPX m_intake;
+    private WPI_VictorSPX m_intake1;
+    private WPI_VictorSPX m_intake2;
     private DigitalInput s_break1;
     private DigitalInput s_break2;
 
@@ -16,10 +17,12 @@ public class EndEffector {
     private boolean isCoralPastStage1;
 
     public EndEffector() {
-        m_intake = new WPI_VictorSPX(Constants.EndEffector.m_intakeID);
+        m_intake1 = new WPI_VictorSPX(Constants.EndEffector.m_intake1ID);
+        m_intake2 = new WPI_VictorSPX(Constants.EndEffector.m_intake2ID);
 
         s_break1 = new DigitalInput(Constants.EndEffector.s_break1ID);
         s_break2 = new DigitalInput(Constants.EndEffector.s_break2ID);
+
         isCoralLoaded = false;
         isCoralPastStage1 = false;
     }
@@ -43,19 +46,29 @@ public class EndEffector {
         isCoralLoaded = s_break2.get();
 
         if (isCoralLoaded == false && isCoralPastStage1 == false) {
-            m_intake.set(0.5);
+            m_intake1.set(0.5);
         } else if (isCoralLoaded == false && isCoralPastStage1 == true) {
-            m_intake.set(0.2);
+            m_intake1.set(0.2);
         } else {
-            m_intake.set(0.0);
+            m_intake1.set(0.0);
         }
     }
 
     public void releaseCoral() {
         if (isCoralLoaded == true) {
-            m_intake.set(0.3);
+            m_intake1.set(0.3);
         } else {
             intakeCoral();
         }
+    }
+
+    public void manualShift(double speed) {
+        m_intake1.set(speed);
+        m_intake2.set(-speed);
+    }
+
+    public void stop() {
+        m_intake1.set(0.0);
+        m_intake2.set(0.0);
     }
 }
