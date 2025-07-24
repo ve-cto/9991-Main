@@ -17,7 +17,8 @@ public class Constants {
         public static final int m_elevatorLeftID = 4;
         public static final int m_elevatorRightID = 5;
 
-        public static final double gravityComp = -0.15;
+        public static final double gravityComp = 0.05;
+        public static final double countsPer10CM = 470.0;
     }
 
     public static class Algae {

@@ -1,5 +1,6 @@
 package frc.robot.subsystems.commands;
 
+import com.ctre.phoenix.motorcontrol.GroupMotorControllers;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -10,26 +11,24 @@ import edu.wpi.first.wpilibj.DigitalInput;
 public class Elevator {
     private WPI_VictorSPX m_elevatorLeft;
     private WPI_VictorSPX m_elevatorRight;
-    private Encoder s_encoder;
-    private final PIDController pid;        
+    private Encoder s_encoder;     
     private DigitalInput s_endstop;
+    private final PIDController pid;
     private double desiredHeight;
 
-    // You'll need to adjust these based on your elevator's specifications
-    private final double COUNTS_PER_INCH = 470.0; // Example value - measure this!
-    private final double GRAVITY_COMPENSATION = 0.15; // Tune this value - usually between 0.05-0.2
+    private final double COUNTS_PER_10CM = Constants.Elevator.countsPer10CM;
+    private final double GRAVITY_COMPENSATION = -Constants.Elevator.gravityComp;
     
-    public enum pos {
+    public enum Position {
         HOME,
-        L0,
         L1,
         L2,
         L3,
+        L4,
         UNKNOWN
     }
-    private pos lastKnownPosition;
-    private pos targetPosition;
-
+    private Position lastKnownPosition;
+    private Position targetPosition;
 
     public Elevator() {
         s_encoder = new Encoder(Constants.Elevator.sEncoderID1, Constants.Elevator.sEncoderID2, false, Encoder.EncodingType.k2X);
@@ -41,27 +40,49 @@ public class Elevator {
         m_elevatorLeft = new WPI_VictorSPX(Constants.Elevator.m_elevatorLeftID);
 
         m_elevatorRight.setInverted(true);
-        // m_elevatorRight.follow(m_elevatorLeft);
+        m_elevatorRight.follow(m_elevatorLeft);
         
         m_elevatorLeft.setSafetyEnabled(true);
         m_elevatorRight.setSafetyEnabled(true);
 
-        // PID values need tuning for your specific elevator
-        pid = new PIDController(0.1, 0, 0);
+
+        // PID values
+        // kP controls how quickly motor operands are set, when the heading isn't the desired value.
+        // kI 
+        // kD gives the controller an extra "nudge", in case it never reaches it's target value.
+        pid = new PIDController(0.1, 0.1, 0);
+
+        
     }
 
+    // -----------------------------------------------------------------------
+    // GETTERS
+    // -----------------------------------------------------------------------
+    
+    /*
+     * Get the height of the elevator, in steps of 10 centimeters
+     */
     public double getHeight() {
-        return s_encoder.getDistance() / COUNTS_PER_INCH;
+        return s_encoder.getDistance() / COUNTS_PER_10CM;
     }
 
-    public double getHeightUnform() {
+    /*
+     * Get the unformatted height of the elevator
+     */
+    public double getHeightRaw() {
         return s_encoder.getDistance();
     }
 
-    public pos getPosition() {
+    /*
+     * Get the last known position of the elevator
+     */
+    public Position getPosition() {
         return lastKnownPosition;
     }
 
+    /*
+     * Get the position that the elevator is currently attempting to range towards
+     */
     public String getTargetPosition() {
         try {
             return targetPosition.toString();
@@ -70,84 +91,117 @@ public class Elevator {
         }
     }
 
+    /*
+     * Get the status of the homing endstop
+     */
     public boolean getEndstop() {
         return s_endstop.get();
     }
 
+    // -----------------------------------------------------------------------
+    // SETTERS
+    // -----------------------------------------------------------------------
+    
+    /*
+     * ONLY TO BE USED IF IN ZERO POSITION (HOMED)
+     * Reset the encoder.
+     */
     public void reset() {
         s_encoder.reset();
-        lastKnownPosition = pos.UNKNOWN;
-        m_elevatorLeft.set(0.0);
-    } 
+        // lastKnownPosition = Position.UNKNOWN;
+        lastKnownPosition = Position.HOME;
+    }
 
+    // -----------------------------------------------------------------------
+    // MOVE
+    // -----------------------------------------------------------------------
+    
+    /*
+     * Return to home position, and reset the encoder once reached.
+     */
     public void home() {
-        targetPosition = pos.HOME;
-        if (s_endstop.get()) {
-            m_elevatorLeft.set(-0.1);
+        targetPosition = Position.HOME;
+        if (!s_endstop.get() && getHeight() > 3.1) {
+            setPosition(targetPosition);
+        
+        } else if (!s_endstop.get() && getHeight() < 3.1) {
+            manualShift(0.05);
+        
         } else {
             m_elevatorLeft.set(0.0);
-            s_encoder.reset();
-            lastKnownPosition = pos.HOME;
+            m_elevatorRight.set(0.0);
+            reset();
         }
         feed();
     }
 
-    public void feed() {
-        m_elevatorLeft.feed();
-        m_elevatorRight.feed();
-    }
-
-    public void stop() {
-        m_elevatorLeft.set(-0.1);
-        m_elevatorRight.set(-0.1);
-    }
-
-    public void gotoL0() {
-        if (lastKnownPosition != pos.UNKNOWN && lastKnownPosition != pos.L0) {
-            setPosition(pos.L0);
-            targetPosition = pos.L0;
+    /*
+     * Range to the coral trough. (First position)
+     */
+    public void gotoL1() {
+        if (lastKnownPosition != Position.UNKNOWN) {
+            setPosition(Position.L1);
+            targetPosition = Position.L1;
         }
         feed();
     }
 
-    public void gotoL1(){
-        if (lastKnownPosition != pos.UNKNOWN && lastKnownPosition != pos.L1) {
-            setPosition(pos.L1);
-            targetPosition = pos.L1;
+    /*
+     * Range to the lowest tree level (Second position)
+     */
+    public void gotoL2(){
+        if (lastKnownPosition != Position.UNKNOWN) {
+            setPosition(Position.L2);
+            targetPosition = Position.L2;
         }
         feed();
     }
 
-    public void gotoL2() {
-        if (lastKnownPosition != pos.UNKNOWN && lastKnownPosition != pos.L2) {
-            setPosition(pos.L2);
-            targetPosition = pos.L2;
-        }
-        feed();
-    }
-
+    /*
+     * Range to the middle tree level (Third position)
+     */
     public void gotoL3() {
-        if (lastKnownPosition != pos.UNKNOWN && lastKnownPosition != pos.L3) {
-            setPosition(pos.L3);
-            targetPosition = pos.L3;
+        if (lastKnownPosition != Position.UNKNOWN) {
+            setPosition(Position.L3);
+            targetPosition = Position.L3;
         }
         feed();
     }
 
-    public void setPosition(pos targetHeight) {
-        switch(targetHeight) {
-            case HOME:
-                desiredHeight = 0.1;
-            case UNKNOWN:
-                break;
-            case L0:
-                desiredHeight = 5;
-            case L1:
-                desiredHeight = 7;
-            case L2:
-                desiredHeight = 9;
-            case L3:
-                desiredHeight = 11;
+    /*
+     * Range to the highest scoring position (Fourth position)
+     */
+    public void gotoL4() {
+        if (lastKnownPosition != Position.UNKNOWN) {
+            setPosition(Position.L4);
+            targetPosition = Position.L4;
+        }
+        feed();
+    }
+
+    /*
+     * Move the elevator to a height corresponding to each coral level.
+     * Automatically applies acceleration graphs.
+     * targetHeight must be type of enumerator Position.
+     */
+    public void setPosition(Position targetHeight) {
+        if (targetHeight == Position.HOME) {
+            desiredHeight = 3;
+        }
+        else if (targetHeight == Position.UNKNOWN) {
+            desiredHeight = 3;
+        }
+        else if (targetHeight == Position.L1) {
+            desiredHeight = 4;
+        }
+        else if (targetHeight == Position.L2) {
+            desiredHeight = 7;
+        }
+        else if (targetHeight == Position.L3) {
+            desiredHeight = 8.8;
+        }
+        else if (targetHeight == Position.L4) {
+            desiredHeight = 16;
         }
 
         double pidOutput = pid.calculate(getHeight(), desiredHeight);
@@ -156,7 +210,6 @@ public class Elevator {
         // The sign is positive because we need to work against gravity
         // You might need to flip the sign depending on your motor polarity
         double motorOutput = pidOutput + GRAVITY_COMPENSATION;
-        
         // Clamp the output to valid range
         motorOutput = Math.min(Math.max(motorOutput, -1.0), 1.0);
         
@@ -164,8 +217,28 @@ public class Elevator {
         m_elevatorRight.set(-motorOutput);
     }
 
+    /*
+     * Shift the elevator manually.
+     * Positive speed means up, negative means down.
+     */
     public void manualShift(double speed) {
-        m_elevatorLeft.set(speed);
-        m_elevatorRight.set(speed);
+        m_elevatorLeft.set(-speed);
+        m_elevatorRight.set(-speed);
+    }
+
+    /*
+     * Hold the current elevator position, using gravity compensation.
+     */
+    public void hold() {
+        m_elevatorLeft.set(GRAVITY_COMPENSATION);
+        m_elevatorRight.set(GRAVITY_COMPENSATION);
+    }
+
+    /*
+     * Feed the motors, avoiding motorsafety triggers.
+     */
+    public void feed() {
+        m_elevatorLeft.feed();
+        m_elevatorRight.feed();
     }
 }

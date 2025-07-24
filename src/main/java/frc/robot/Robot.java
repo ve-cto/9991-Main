@@ -93,7 +93,7 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("Drive Forward Value", forward);
     SmartDashboard.putNumber("Drive Rotation Value", rotation);
 
-    SmartDashboard.putNumber("Encoder Distance", elevator.getHeightUnform());
+    SmartDashboard.putNumber("Encoder Distance", elevator.getHeightRaw());
   }
 
   @Override
@@ -133,28 +133,27 @@ public class Robot extends TimedRobot {
     // -------------------------------------------------------------------------------------------------------
     // ELEVATOR
     // -------------------------------------------------------------------------------------------------------
-    // if (controllerMap.isLeftDPadC1Pressed()) {
-    //   elevator.gotoL1();
-    // } else if (controllerMap.isUpDPadC1Pressed()) {
-    //   elevator.gotoL2();
-    // } else if (controllerMap.isRightDPadC1Pressed()) {
-    //   elevator.gotoL3();
-    // } else if (controllerMap.isDownDPadC1Pressed()) {
-    //   elevator.gotoL0();
-    // } else if (controllerMap.isNoDPadC1Pressed()) {
-    //   elevator.stop();
-    //   // elevator.feed();
-    // } else {
-    //   elevator.stop();
-    // }
-
-    if (controllerMap.isUpDPadC1Pressed()) {
-      elevator.manualShift(-0.4);
+    if (controllerMap.isLeftDPadC1Pressed()) {
+      elevator.gotoL2();
+    } else if (controllerMap.isUpDPadC1Pressed()) {
+      elevator.gotoL3();
+    } else if (controllerMap.isRightDPadC1Pressed()) {
+      elevator.gotoL4();
     } else if (controllerMap.isDownDPadC1Pressed()) {
-      elevator.manualShift(0.0);
-    } else {
-      elevator.manualShift(-0.15);
+      elevator.gotoL1();
+    } else if (controllerMap.isNoDPadC1Pressed()) {
+      elevator.hold();
+    } else if (controllerMap.isStartButtonC1Pressed()) {
+      elevator.home();
     }
+
+    // if (controllerMap.isUpDPadC1Pressed()) {
+    //   elevator.manualShift(0.3);
+    // } else if (controllerMap.isDownDPadC1Pressed()) {
+    //   elevator.manualShift(-0.3);
+    // } else {
+    //   elevator.hold();
+    // }
     
     // -------------------------------------------------------------------------------------------------------
     // END EFFECTOR
