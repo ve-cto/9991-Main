@@ -22,7 +22,8 @@ public class Constants {
     }
 
     public static class Algae {
-
+        public static final int m_armID = 0;
+        public static final int m_grabberID = 0;
 
     }
 

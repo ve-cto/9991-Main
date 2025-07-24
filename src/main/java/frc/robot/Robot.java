@@ -8,6 +8,7 @@ import frc.robot.subsystems.tools.MapRanges;
 import frc.robot.subsystems.maps.LimelightMap;
 import frc.robot.subsystems.commands.Elevator;
 import frc.robot.subsystems.commands.EndEffector;
+import frc.robot.subsystems.commands.Algae;
 
 // import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -30,6 +31,7 @@ public class Robot extends TimedRobot {
   private LimelightMap limelightMap;
   private Elevator elevator;
   private EndEffector endEffector;
+  private Algae algae;
 
   private boolean preventDrive;
   private boolean useJoystickDrive;
@@ -58,6 +60,7 @@ public class Robot extends TimedRobot {
     limelightDriveSubsystem = new LimelightDriveSubsystem();
     elevator = new Elevator();
     endEffector = new EndEffector();
+    algae = new Algae();
 
     // set preventDrive to false on init
     this.preventDrive = false;
@@ -133,41 +136,60 @@ public class Robot extends TimedRobot {
     // -------------------------------------------------------------------------------------------------------
     // ELEVATOR
     // -------------------------------------------------------------------------------------------------------
-    if (controllerMap.isLeftDPadC1Pressed()) {
-      elevator.gotoL2();
-    } else if (controllerMap.isUpDPadC1Pressed()) {
-      elevator.gotoL3();
-    } else if (controllerMap.isRightDPadC1Pressed()) {
-      elevator.gotoL4();
-    } else if (controllerMap.isDownDPadC1Pressed()) {
-      elevator.gotoL1();
-    } else if (controllerMap.isNoDPadC1Pressed()) {
-      elevator.hold();
-    } else if (controllerMap.isStartButtonC1Pressed()) {
-      elevator.home();
-    }
-
-    // if (controllerMap.isUpDPadC1Pressed()) {
-    //   elevator.manualShift(0.3);
+    
+    // if (controllerMap.isLeftDPadC1Pressed()) {
+    //   elevator.gotoL2();
+    // } else if (controllerMap.isUpDPadC1Pressed()) {
+    //   elevator.gotoL3();
+    // } else if (controllerMap.isRightDPadC1Pressed()) {
+    //   elevator.gotoL4();
     // } else if (controllerMap.isDownDPadC1Pressed()) {
-    //   elevator.manualShift(-0.3);
-    // } else {
+    //   elevator.gotoL1();
+    // } else if (controllerMap.isNoDPadC1Pressed()) {
     //   elevator.hold();
+    // } else if (controllerMap.isStartButtonC1Pressed()) {
+    //   elevator.home();
     // }
+
+    if (controllerMap.isUpDPadC1Pressed()) {
+      elevator.manualShift(0.2);
+    } else if (controllerMap.isDownDPadC1Pressed()) {
+      elevator.manualShift(-0.1);
+    } else {
+      elevator.hold();
+    }
     
     // -------------------------------------------------------------------------------------------------------
     // END EFFECTOR
     // -------------------------------------------------------------------------------------------------------
-    if (controllerMap.isAButtonC1Pressed()) {
+    if (controllerMap.isRightBumperC1Pressed()) {
       // endEffector.intakeCoral();
       endEffector.manualShift(0.4);
-    } else if (controllerMap.isBButtonC1Pressed()) {
+    } else if (controllerMap.isLeftBumperC1Pressed()) {
       // endEffector.releaseCoral();
       endEffector.manualShift(-0.4);
     } else {
       endEffector.stop();
     }
 
+    // -------------------------------------------------------------------------------------------------------
+    // ALGAE
+    // -------------------------------------------------------------------------------------------------------
+    if (controllerMap.isAButtonC1Pressed()) {
+      algae.manualShiftGrabber(0.3);
+    } else if (controllerMap.isBButtonC2Pressed()) {
+      algae.manualShiftGrabber(-0.3);
+    } else {
+      algae.stopGrabber();
+    }
+
+    if (controllerMap.isXButtonC1Pressed()) {
+      algae.manualShiftGrabber(0.08);
+    } else if (controllerMap.isYButtonC1Pressed()) {
+      algae.manualShiftGrabber(-0.08);
+    } else {
+      algae.stopArm();
+    }
 
     // -------------------------------------------------------------------------------------------------------
     // DRIVE
