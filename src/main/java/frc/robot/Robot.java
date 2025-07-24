@@ -152,10 +152,10 @@ public class Robot extends TimedRobot {
     // }
 
     if (controllerMap.isUpDPadC1Pressed()) {
-      elevator.manualShift(0.2);
+      elevator.manualShift(0.4);
     } else if (controllerMap.isDownDPadC1Pressed()) {
-      elevator.manualShift(-0.1);
-    } else {
+      elevator.manualShift(-0.2);
+    } else if (controllerMap.isNoDPadC1Pressed()) {
       elevator.hold();
     }
     
@@ -184,9 +184,9 @@ public class Robot extends TimedRobot {
     }
 
     if (controllerMap.isXButtonC1Pressed()) {
-      algae.manualShiftGrabber(0.08);
+      algae.manualShiftArm(0.5);
     } else if (controllerMap.isYButtonC1Pressed()) {
-      algae.manualShiftGrabber(-0.08);
+      algae.manualShiftArm(-0.3);
     } else {
       algae.stopArm();
     }
