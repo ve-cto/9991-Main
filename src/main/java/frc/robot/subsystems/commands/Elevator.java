@@ -16,7 +16,7 @@ public class Elevator {
     private final PIDController pid;
     private double desiredHeight;
 
-    private final double COUNTS_PER_10CM = Constants.Elevator.countsPer10CM;
+    private final double COUNTS_PER_1M = Constants.Elevator.countsPer1M;
     private final double GRAVITY_COMPENSATION = -Constants.Elevator.gravityComp;
     
     public enum Position {
@@ -50,9 +50,7 @@ public class Elevator {
         // kP controls how quickly motor operands are set, when the heading isn't the desired value.
         // kI 
         // kD gives the controller an extra "nudge", in case it never reaches it's target value.
-        pid = new PIDController(0.1, 0.1, 0);
-
-        
+        pid = new PIDController(1, 0.9, 0.0);
     }
 
     // -----------------------------------------------------------------------
@@ -63,7 +61,7 @@ public class Elevator {
      * Get the height of the elevator, in steps of 10 centimeters
      */
     public double getHeight() {
-        return s_encoder.getDistance() / COUNTS_PER_10CM;
+        return s_encoder.getDistance() / COUNTS_PER_1M;
     }
 
     /*
@@ -186,22 +184,22 @@ public class Elevator {
      */
     public void setPosition(Position targetHeight) {
         if (targetHeight == Position.HOME) {
-            desiredHeight = 3;
+            desiredHeight = 0;
         }
         else if (targetHeight == Position.UNKNOWN) {
-            desiredHeight = 3;
+            desiredHeight = 0.6;
         }
         else if (targetHeight == Position.L1) {
-            desiredHeight = 4;
+            desiredHeight = 0.06;
         }
         else if (targetHeight == Position.L2) {
-            desiredHeight = 7;
+            desiredHeight = 0.135;
         }
         else if (targetHeight == Position.L3) {
-            desiredHeight = 8.8;
+            desiredHeight = 0.51;
         }
         else if (targetHeight == Position.L4) {
-            desiredHeight = 16;
+            desiredHeight = 1.1;
         }
 
         double pidOutput = pid.calculate(getHeight(), desiredHeight);

@@ -18,12 +18,12 @@ public class Constants {
         public static final int m_elevatorRightID = 5;
 
         public static final double gravityComp = 0.05;
-        public static final double countsPer10CM = 470.0;
+        public static final double countsPer1M = 7850.0;
     }
 
     public static class Algae {
         public static final int m_armID = 8;
-        public static final int m_grabberID = 0;
+        public static final int m_grabberID = 7;
 
     }
 
@@ -31,7 +31,7 @@ public class Constants {
         public static final int s_break1ID = 3;
         public static final int s_break2ID = 4;
 
-        public static final int m_intake1ID = 7;
+        public static final int m_intake1ID = 0;
         public static final int m_intake2ID = 6;
     }
 
