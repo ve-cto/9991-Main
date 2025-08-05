@@ -1,5 +1,7 @@
 package frc.robot;
 
+import edu.wpi.first.wpilibj.Timer;
+
 public class Constants {
     public static class Robot {
         public static double driveSpeedSlow = 0.6;
@@ -42,8 +44,21 @@ public class Constants {
         public static final int m_driveBRID = 0;
     }
 
-    public static class Field {
+    public static class Field {}
 
-
+    public static class Led {
+        public static final int l_led1ID = 0;
+        public static final int l_led2ID = 1;
+        public static enum StatusList {
+            DISCONNECT,
+            DISABLED,
+            IDLE,
+            AUTONOMOUS,
+            LOADED,
+            READY,
+            BLANK
+        }
     }
+
+
 }

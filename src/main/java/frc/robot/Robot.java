@@ -1,6 +1,12 @@
 package frc.robot;
 
+import com.ctre.phoenix6.signals.ConnectedMotorValue;
+
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.Timer;
 import frc.robot.subsystems.commands.DriveSubsystem;
 import frc.robot.subsystems.commands.LimelightDriveSubsystem;
 import frc.robot.subsystems.maps.ControllerMap;
@@ -9,6 +15,7 @@ import frc.robot.subsystems.maps.LimelightMap;
 import frc.robot.subsystems.commands.Elevator;
 import frc.robot.subsystems.commands.EndEffector;
 import frc.robot.subsystems.commands.Algae;
+import frc.robot.subsystems.commands.Led;
 
 // import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -20,10 +27,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * this project, you must also update the manifest file in the resource directory.
  */
 public class Robot extends TimedRobot {
-  private double driveSpeedCurrent;
-  private double forward;
-  private double rotation;
-
   private ControllerMap controllerMap;
   private DriveSubsystem driveSubsystem;
   private MapRanges mapRanges;
@@ -32,9 +35,19 @@ public class Robot extends TimedRobot {
   private Elevator elevator;
   private EndEffector endEffector;
   private Algae algae;
+  private Led led;
+  private Constants.Led.StatusList ledBuffer;
+  private Constants.Led.StatusList ledTeleopBuffer;
+  private Timer timer;
 
+  private double driveSpeedCurrent;
+  private double forward;
+  private double rotation;
   private boolean preventDrive;
   private boolean useJoystickDrive;
+
+  private boolean ledFlashOverride = false;
+  private boolean wasCoralLoaded;
 
   private static final int driveSchemeDefault = 0;
   private static final int driveSchemeDual = 1;
@@ -47,6 +60,15 @@ public class Robot extends TimedRobot {
   private static final String autoCustom1 = "Custom1";
   private String autoSelected;
   private final SendableChooser<String> autoChooser = new SendableChooser<>();
+
+  private final NetworkTableInstance networkTableInstance = NetworkTableInstance.getDefault();
+    
+  private final NetworkTable driveTable = networkTableInstance.getTable("Drive");
+  private final NetworkTable elevatorTable =  networkTableInstance.getTable("Elevator");
+  private final NetworkTable endEffectorTable = networkTableInstance.getTable("EndEffector");
+  private final NetworkTable limelightTable = networkTableInstance.getTable("Limelight");
+  private final NetworkTable ledTable = networkTableInstance.getTable("LED's");
+  private final NetworkTable autonomousTable = networkTableInstance.getTable("Autonomous");
 
   public Robot() {}
 
@@ -61,10 +83,12 @@ public class Robot extends TimedRobot {
     elevator = new Elevator();
     endEffector = new EndEffector();
     algae = new Algae();
-
+    led = new Led();
+    
     // set preventDrive to false on init
     this.preventDrive = false;
   
+    
 
     SmartDashboard.getBoolean("Prevent Driver Control?", preventDrive);
     SmartDashboard.getBoolean("Use Joysticks to Drive?", useJoystickDrive);
@@ -79,34 +103,47 @@ public class Robot extends TimedRobot {
     SmartDashboard.putData("selectedDriveMode", driveSchemeChooser);
 
     elevator.reset();
+    ledBuffer = Constants.Led.StatusList.BLANK; 
   }
 
   @Override
   public void robotPeriodic() {
-    SmartDashboard.putNumber("Current Speed", driveSpeedCurrent);
+    (driveTable.getDoubleTopic("Drive Forward Value").publish()).set(forward);
+    (driveTable.getDoubleTopic("Drive Rotation Value").publish()).set(rotation);
+    (driveTable.getDoubleTopic("Drive Speed").publish()).set(driveSpeedCurrent);
 
-    SmartDashboard.putString("Current Elevator Position", elevator.getPosition().toString());
-    SmartDashboard.putNumber("Current Elevator Height", elevator.getHeight());
-    SmartDashboard.putString("Elevator ranging towards:", elevator.getTargetPosition().toString());
-    SmartDashboard.putBoolean("Elevator Endstop", elevator.getEndstop());
+    (elevatorTable.getStringTopic("Elevator Position").publish()).set(elevator.getPosition().toString());
+    (elevatorTable.getDoubleTopic("Elevator Raw Height").publish()).set(elevator.getHeightRaw());
+    (elevatorTable.getDoubleTopic("Elevator Height").publish()).set(elevator.getHeight());
+    (elevatorTable.getStringTopic("Elevator Ranging Towards").publish()).set(elevator.getTargetPosition().toString());
+    (elevatorTable.getBooleanTopic("Elevator Endstop").publish()).set(elevator.getEndstop());
+    
+    (endEffectorTable.getStringTopic("Intake Status").publish()).set(endEffector.getCoralState());
+    (endEffectorTable.getBooleanTopic("Coral Loaded?").publish()).set(endEffector.getCoralLoaded());
 
-    SmartDashboard.putString("Intake Status", endEffector.getCoralState());
-    SmartDashboard.putBoolean("Coral Loaded?", endEffector.getCoralLoaded());
+    (ledTable.getStringTopic("LED Status").publish()).set(led.getStatus().toString());
+    (ledTable.getBooleanTopic("LED's Flashing?").publish()).set(led.getFlashing());
 
-    SmartDashboard.putNumber("Drive Forward Value", forward);
-    SmartDashboard.putNumber("Drive Rotation Value", rotation);
-
-    SmartDashboard.putNumber("Encoder Distance", elevator.getHeightRaw());
+    if (DriverStation.isDSAttached() == true) {  
+      if (ledFlashOverride == false) {
+        led.setStatus(ledBuffer);
+      }
+    } else {
+      led.setStatus(Constants.Led.StatusList.DISCONNECT);
+    }
+    led.periodic();
   }
 
   @Override
   public void autonomousInit() {
     autoSelected = autoChooser.getSelected();
-    SmartDashboard.putString("Currently running auto:", autoSelected);
+    
+    (autonomousTable.getStringTopic("Running Auto").publish()).set(autoSelected);
   }
 
   @Override
   public void autonomousPeriodic() {
+    led.setStatus(Constants.Led.StatusList.AUTONOMOUS);
     switch (autoSelected) {
       case autoCustom1:
         // code in here...
@@ -121,12 +158,14 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopInit() {
     driveSchemeSelected = driveSchemeChooser.getSelected();
-    SmartDashboard.putString("Current drive scheme:", DRIVE_SCHEME_STRINGS[driveSchemeSelected]);
+    (driveTable.getStringTopic("Drive Scheme").publish()).set(DRIVE_SCHEME_STRINGS[driveSchemeSelected]);
     elevator.reset();
   }
 
   @Override
   public void teleopPeriodic() {
+    ledTeleopBuffer = Constants.Led.StatusList.IDLE;
+
     // Reset the driving vars
     double forward = 0.0;
     double rotation = 0.0;
@@ -171,6 +210,24 @@ public class Robot extends TimedRobot {
     } else {
       endEffector.stop();
     }
+
+    // For testing purposes, make the robot think that coral is loaded when we press the start button.
+    if (controllerMap.isStartButtonC1Pressed()) {
+      
+    }
+    // Flash lights when Coral is first loaded.
+    // If on this iteration Coral is loaded, and on the last iteration Coral was not loaded, flash the LED's. 
+    if (endEffector.getCoralLoaded() && wasCoralLoaded == false) {
+      led.flashStatus(Constants.Led.StatusList.LOADED, 3, 0.3);
+    }
+    // If the lights are currently flashing, enable the override.
+    if (led.getFlashing()) {
+      ledFlashOverride = true;
+    } else {
+      ledFlashOverride = false;
+    }
+    // Prepare for the next iteration.
+    wasCoralLoaded = endEffector.getCoralLoaded();
 
     // -------------------------------------------------------------------------------------------------------
     // ALGAE
@@ -239,7 +296,9 @@ public class Robot extends TimedRobot {
 
     this.forward = forward;
     this.rotation = rotation;
-    driveSubsystem.drive(forward, rotation, driveSpeedCurrent);
+    driveSubsystem.drive(forward, rotation, driveSpeedCurrent); 
+    
+    ledBuffer = ledTeleopBuffer;
   }
 
   @Override
@@ -248,6 +307,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void disabledPeriodic() {
+    led.setStatus(Constants.Led.StatusList.DISABLED);
   }
 
   @Override

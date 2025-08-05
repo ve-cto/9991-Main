@@ -1,0 +1,57 @@
+<xml version="1.0">
+<dashboard>
+	<widget field="Currently running auto:" type="String" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
+		<location x="0" y="22"/>
+	</widget>
+	<widget field="Current drive scheme:" type="String" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
+		<location x="0" y="0"/>
+	</widget>
+	<widget field="Elevator Height" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.LinePlot">
+		<location x="11" y="416"/>
+		<width>315</width>
+		<height>211</height>
+	</widget>
+	<widget field="LED's Flashing?" type="Boolean" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
+		<location x="1210" y="75"/>
+	</widget>
+	<widget field="LED Status" type="String" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
+		<location x="1239" y="51"/>
+	</widget>
+	<widget field="selectedDriveMode" type="String Chooser" class="edu.wpi.first.smartdashboard.gui.elements.Chooser">
+		<location x="1233" y="529"/>
+	</widget>
+	<widget field="Coral Loaded?" type="Boolean" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
+		<location x="1018" y="608"/>
+	</widget>
+	<widget field="Intake Status" type="String" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
+		<location x="1022" y="582"/>
+		<height>21</height>
+	</widget>
+	<widget field="Elevator Endstop" type="Boolean" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
+		<location x="351" y="576"/>
+	</widget>
+	<widget field="Elevator ranging towards:" type="String" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
+		<location x="57" y="363"/>
+	</widget>
+	<widget field="Elevator Raw Height" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
+		<location x="333" y="602"/>
+	</widget>
+	<widget field="Current Elevator Position" type="String" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
+		<location x="59" y="388"/>
+	</widget>
+	<widget field="Current Speed" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
+		<location x="48" y="54"/>
+	</widget>
+	<widget field="Drive Rotation Value" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
+		<location x="10" y="108"/>
+	</widget>
+	<widget field="Drive Forward Value" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
+		<location x="12" y="80"/>
+	</widget>
+	<widget field="Pick an auto." type="String Chooser" class="edu.wpi.first.smartdashboard.gui.elements.Chooser">
+		<location x="1233" y="433"/>
+	</widget>
+</dashboard>
+<live-window>
+</live-window>
+</xml>

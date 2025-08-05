@@ -1,0 +1,110 @@
+package frc.robot.subsystems.commands;
+
+import static edu.wpi.first.units.Units.Percent;
+import static edu.wpi.first.units.Units.Second;
+import static edu.wpi.first.units.Units.Seconds;
+
+import edu.wpi.first.units.measure.Time;
+import edu.wpi.first.wpilibj.AddressableLED;
+import edu.wpi.first.wpilibj.AddressableLEDBuffer;
+import edu.wpi.first.wpilibj.LEDPattern;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.LEDPattern.GradientType;
+import edu.wpi.first.wpilibj.util.Color;
+
+import frc.robot.Constants;
+
+public class Led {
+    private Timer flashTimer;
+    private boolean isFlashing;
+    
+    private AddressableLED l_led;
+
+    private AddressableLEDBuffer l_ledBuffer;
+
+    private Constants.Led.StatusList Status;
+
+    private LEDPattern robotDisconnect = LEDPattern.solid(Color.kOrangeRed);
+        
+    private LEDPattern robotDisabled = LEDPattern.gradient(GradientType.kContinuous, Color.kOrangeRed, Color.kSalmon).scrollAtRelativeSpeed(Percent.per(Second).of(25));
+
+    private LEDPattern robotIdle = LEDPattern.gradient(GradientType.kContinuous, Color.kAliceBlue, Color.kGold).scrollAtRelativeSpeed(Percent.per(Second).of(10));
+
+    private LEDPattern robotLoaded = LEDPattern.solid(Color.kLime).breathe(Seconds.of(0.5));
+
+    private LEDPattern robotAutonomous = LEDPattern.rainbow(255, 200);
+
+    private LEDPattern robotReady = LEDPattern.solid(Color.kLime).breathe(Seconds.of(0.2));
+
+    private LEDPattern ledBlank = LEDPattern.solid(Color.kBlack);
+
+    public Led() {
+        l_led = new AddressableLED(Constants.Led.l_led1ID);
+    
+        l_ledBuffer = new AddressableLEDBuffer(9);
+        
+        l_led.setLength(l_ledBuffer.getLength());
+
+        l_led.setData(l_ledBuffer);
+
+        this.isFlashing = false;
+    }
+
+    public void periodic() {
+        l_led.setData(l_ledBuffer);
+    }
+
+    public Constants.Led.StatusList getStatus() {
+        return this.Status;
+    }
+
+    public void setAndApplyStatus(Constants.Led.StatusList desiredStatus) {
+        setStatus(desiredStatus);
+        periodic();
+    }
+
+    public void setStatus(Constants.Led.StatusList desiredStatus) {
+        this.Status = desiredStatus;
+        switch (desiredStatus) {
+            case DISCONNECT:
+                robotDisconnect.applyTo(l_ledBuffer);
+            case DISABLED:
+                robotDisabled.applyTo(l_ledBuffer);
+            case IDLE:
+                robotIdle.applyTo(l_ledBuffer);
+            case AUTONOMOUS:
+                robotAutonomous.applyTo(l_ledBuffer);
+            case LOADED:
+                robotLoaded.applyTo(l_ledBuffer);
+            case READY:
+                robotReady.applyTo(l_ledBuffer);
+            case BLANK:
+                ledBlank.applyTo(l_ledBuffer);
+        }
+    }
+
+    public void flashStatus(Constants.Led.StatusList desiredStatus, int numFlashes, double flashSpeed) {
+        if (this.isFlashing = false) {
+            this.isFlashing = true;
+            flashTimer.restart();
+            System.out.println("Started to Flash");
+            for (int i = 0; i < numFlashes+1; i++) {
+                if (flashTimer.get() < flashSpeed) {
+                    setStatus(desiredStatus);
+                } else if (flashTimer.get() < flashSpeed * 2) {
+                    setStatus(Constants.Led.StatusList.BLANK);
+                } else {
+                    flashTimer.restart();
+                }
+            }
+            System.out.println("Flashing Completed");
+            this.isFlashing = false;
+        }
+    }
+
+    public boolean getFlashing() {
+        return (this.isFlashing);
+    }
+
+    public void reset() {}
+}
