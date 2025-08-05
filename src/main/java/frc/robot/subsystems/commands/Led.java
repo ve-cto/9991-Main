@@ -39,7 +39,7 @@ public class Led {
     private LEDPattern ledBlank = LEDPattern.solid(Color.kBlack);
 
     public Led() {
-        l_led = new AddressableLED(Constants.Led.l_led1ID);
+        l_led = new AddressableLED(Constants.Led.l_ledID);
     
         l_ledBuffer = new AddressableLEDBuffer(9);
         
@@ -52,6 +52,7 @@ public class Led {
 
     public void periodic() {
         l_led.setData(l_ledBuffer);
+        // System.out.println("LED's set to buffer");
     }
 
     public Constants.Led.StatusList getStatus() {
@@ -81,6 +82,7 @@ public class Led {
             case BLANK:
                 ledBlank.applyTo(l_ledBuffer);
         }
+        // System.out.println("LED's Status has been changed");
     }
 
     public void flashStatus(Constants.Led.StatusList desiredStatus, int numFlashes, double flashSpeed) {

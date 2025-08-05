@@ -16,16 +16,16 @@ public class Constants {
 
         public static final int sEndstopID = 2;
 
-        public static final int m_elevatorLeftID = 4;
-        public static final int m_elevatorRightID = 5;
+        public static final int m_elevatorLeftID = 1;
+        public static final int m_elevatorRightID = 2;
 
         public static final double gravityComp = 0.05;
         public static final double countsPer1M = 7850.0;
     }
 
     public static class Algae {
-        public static final int m_armID = 8;
-        public static final int m_grabberID = 7;
+        public static final int m_armID = 0;
+        public static final int m_grabberID = 0;
 
     }
 
@@ -33,8 +33,8 @@ public class Constants {
         public static final int s_break1ID = 3;
         public static final int s_break2ID = 4;
 
-        public static final int m_intake1ID = 0;
-        public static final int m_intake2ID = 6;
+        public static final int m_intake1ID = 3;
+        public static final int m_intake2ID = jor;
     }
 
     public static class Drive {
@@ -47,8 +47,7 @@ public class Constants {
     public static class Field {}
 
     public static class Led {
-        public static final int l_led1ID = 0;
-        public static final int l_led2ID = 1;
+        public static final int l_ledID = 0;
         public static enum StatusList {
             DISCONNECT,
             DISABLED,

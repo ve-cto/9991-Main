@@ -2,8 +2,11 @@ package frc.robot;
 
 import com.ctre.phoenix6.signals.ConnectedMotorValue;
 
+import edu.wpi.first.networktables.BooleanPublisher;
+import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
@@ -70,6 +73,22 @@ public class Robot extends TimedRobot {
   private final NetworkTable ledTable = networkTableInstance.getTable("LED's");
   private final NetworkTable autonomousTable = networkTableInstance.getTable("Autonomous");
 
+  DoublePublisher networkDriveForward;
+  StringPublisher networkElevatorRange;
+  BooleanPublisher networkElevatorEndstop;
+  StringPublisher networkEndEffectorStatus;
+  BooleanPublisher networkEndEffectorCoral;
+  StringPublisher networkLEDStatus;
+  BooleanPublisher networkLEDFlashing;
+  StringPublisher networkAutoRunning;
+  DoublePublisher networkDriveRotation;
+  DoublePublisher networkDriveSpeed;
+  StringPublisher networkElevatorPos;
+  DoublePublisher networkElevatorRHeight;
+  DoublePublisher networkElevatorHeight;
+
+
+
   public Robot() {}
 
   @Override
@@ -88,7 +107,24 @@ public class Robot extends TimedRobot {
     // set preventDrive to false on init
     this.preventDrive = false;
   
+    networkDriveForward = driveTable.getDoubleTopic("Drive Forward Value").publish();
+    networkDriveRotation = driveTable.getDoubleTopic("Drive Rotation Value").publish();
+    networkDriveSpeed = driveTable.getDoubleTopic("Drive Speed").publish();
     
+
+    networkElevatorPos = elevatorTable.getStringTopic("Elevator Position").publish();
+    networkElevatorRHeight = elevatorTable.getDoubleTopic("Elevator Raw Height").publish();
+    networkElevatorHeight = elevatorTable.getDoubleTopic("Elevator Height").publish();
+    networkElevatorRange = elevatorTable.getStringTopic("Elevator Ranging Towards").publish();
+    networkElevatorEndstop = elevatorTable.getBooleanTopic("Elevator Endstop").publish();
+    
+    networkEndEffectorStatus = endEffectorTable.getStringTopic("Intake Status").publish();
+    networkEndEffectorCoral = endEffectorTable.getBooleanTopic("Coral Loaded?").publish();
+
+    networkLEDStatus = ledTable.getStringTopic("LED Status").publish();
+    networkLEDFlashing = ledTable.getBooleanTopic("LED's Flashing?").publish();
+
+    networkAutoRunning = autonomousTable.getStringTopic("Running Auto").publish();
 
     SmartDashboard.getBoolean("Prevent Driver Control?", preventDrive);
     SmartDashboard.getBoolean("Use Joysticks to Drive?", useJoystickDrive);
@@ -108,22 +144,6 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotPeriodic() {
-    (driveTable.getDoubleTopic("Drive Forward Value").publish()).set(forward);
-    (driveTable.getDoubleTopic("Drive Rotation Value").publish()).set(rotation);
-    (driveTable.getDoubleTopic("Drive Speed").publish()).set(driveSpeedCurrent);
-
-    (elevatorTable.getStringTopic("Elevator Position").publish()).set(elevator.getPosition().toString());
-    (elevatorTable.getDoubleTopic("Elevator Raw Height").publish()).set(elevator.getHeightRaw());
-    (elevatorTable.getDoubleTopic("Elevator Height").publish()).set(elevator.getHeight());
-    (elevatorTable.getStringTopic("Elevator Ranging Towards").publish()).set(elevator.getTargetPosition().toString());
-    (elevatorTable.getBooleanTopic("Elevator Endstop").publish()).set(elevator.getEndstop());
-    
-    (endEffectorTable.getStringTopic("Intake Status").publish()).set(endEffector.getCoralState());
-    (endEffectorTable.getBooleanTopic("Coral Loaded?").publish()).set(endEffector.getCoralLoaded());
-
-    (ledTable.getStringTopic("LED Status").publish()).set(led.getStatus().toString());
-    (ledTable.getBooleanTopic("LED's Flashing?").publish()).set(led.getFlashing());
-
     if (DriverStation.isDSAttached() == true) {  
       if (ledFlashOverride == false) {
         led.setStatus(ledBuffer);
@@ -138,7 +158,7 @@ public class Robot extends TimedRobot {
   public void autonomousInit() {
     autoSelected = autoChooser.getSelected();
     
-    (autonomousTable.getStringTopic("Running Auto").publish()).set(autoSelected);
+    // (autonomousTable.getStringTopic("Running Auto").publish()).set(autoSelected);
   }
 
   @Override
