@@ -151,7 +151,6 @@ public class Robot extends TimedRobot {
     } else {
       led.setStatus(Constants.Led.StatusList.DISCONNECT);
     }
-    led.periodic();
   }
 
   @Override

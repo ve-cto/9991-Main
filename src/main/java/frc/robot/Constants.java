@@ -34,7 +34,7 @@ public class Constants {
         public static final int s_break2ID = 4;
 
         public static final int m_intake1ID = 3;
-        public static final int m_intake2ID = jor;
+        public static final int m_intake2ID = 4;
     }
 
     public static class Drive {
@@ -48,6 +48,11 @@ public class Constants {
 
     public static class Led {
         public static final int l_ledID = 0;
+
+        public static final int o_arduino1ID = 7;
+        public static final int o_arduino2ID = 8;
+        public static final int o_arduino3ID = 9;
+        
         public static enum StatusList {
             DISCONNECT,
             DISABLED,

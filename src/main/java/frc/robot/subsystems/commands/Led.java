@@ -1,58 +1,23 @@
 package frc.robot.subsystems.commands;
 
-import static edu.wpi.first.units.Units.Percent;
-import static edu.wpi.first.units.Units.Second;
-import static edu.wpi.first.units.Units.Seconds;
-
-import edu.wpi.first.units.measure.Time;
-import edu.wpi.first.wpilibj.AddressableLED;
-import edu.wpi.first.wpilibj.AddressableLEDBuffer;
-import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.LEDPattern.GradientType;
-import edu.wpi.first.wpilibj.util.Color;
+
+import edu.wpi.first.wpilibj.DigitalOutput;
 
 import frc.robot.Constants;
 
 public class Led {
     private Timer flashTimer;
     private boolean isFlashing;
-    
-    private AddressableLED l_led;
 
-    private AddressableLEDBuffer l_ledBuffer;
+    DigitalOutput arduino1 = new DigitalOutput(Constants.Led.o_arduino1ID);
+    DigitalOutput arduino2 = new DigitalOutput(Constants.Led.o_arduino2ID);
+    DigitalOutput arduino3 = new DigitalOutput(Constants.Led.o_arduino3ID);
 
     private Constants.Led.StatusList Status;
 
-    private LEDPattern robotDisconnect = LEDPattern.solid(Color.kOrangeRed);
-        
-    private LEDPattern robotDisabled = LEDPattern.gradient(GradientType.kContinuous, Color.kOrangeRed, Color.kSalmon).scrollAtRelativeSpeed(Percent.per(Second).of(25));
-
-    private LEDPattern robotIdle = LEDPattern.gradient(GradientType.kContinuous, Color.kAliceBlue, Color.kGold).scrollAtRelativeSpeed(Percent.per(Second).of(10));
-
-    private LEDPattern robotLoaded = LEDPattern.solid(Color.kLime).breathe(Seconds.of(0.5));
-
-    private LEDPattern robotAutonomous = LEDPattern.rainbow(255, 200);
-
-    private LEDPattern robotReady = LEDPattern.solid(Color.kLime).breathe(Seconds.of(0.2));
-
-    private LEDPattern ledBlank = LEDPattern.solid(Color.kBlack);
-
     public Led() {
-        l_led = new AddressableLED(Constants.Led.l_ledID);
-    
-        l_ledBuffer = new AddressableLEDBuffer(9);
-        
-        l_led.setLength(l_ledBuffer.getLength());
-
-        l_led.setData(l_ledBuffer);
-
         this.isFlashing = false;
-    }
-
-    public void periodic() {
-        l_led.setData(l_ledBuffer);
-        // System.out.println("LED's set to buffer");
     }
 
     public Constants.Led.StatusList getStatus() {
@@ -61,26 +26,25 @@ public class Led {
 
     public void setAndApplyStatus(Constants.Led.StatusList desiredStatus) {
         setStatus(desiredStatus);
-        periodic();
     }
 
     public void setStatus(Constants.Led.StatusList desiredStatus) {
         this.Status = desiredStatus;
         switch (desiredStatus) {
             case DISCONNECT:
-                robotDisconnect.applyTo(l_ledBuffer);
+                sendData(1);
             case DISABLED:
-                robotDisabled.applyTo(l_ledBuffer);
+                sendData(2);
             case IDLE:
-                robotIdle.applyTo(l_ledBuffer);
+                sendData(3);
             case AUTONOMOUS:
-                robotAutonomous.applyTo(l_ledBuffer);
+                sendData(4);
             case LOADED:
-                robotLoaded.applyTo(l_ledBuffer);
+                sendData(5);
             case READY:
-                robotReady.applyTo(l_ledBuffer);
+                sendData(6);
             case BLANK:
-                ledBlank.applyTo(l_ledBuffer);
+                sendData(0);
         }
         // System.out.println("LED's Status has been changed");
     }
@@ -106,6 +70,18 @@ public class Led {
 
     public boolean getFlashing() {
         return (this.isFlashing);
+    }
+
+    // split an integer i into individual bits and send to the Arduino    
+    // maximum i = 2^n - 1
+    // (https://sites.google.com/albany.k12.ny.us/team1493programming/add-an-arduino)
+    public void sendData(int i){
+        // boolean b1=false,b2=false,b3=false;
+        // I have no idea how this works.
+        
+        arduino1.set(((i>>2)&1) ==1);
+        arduino2.set(((i>>1)&1) ==1);
+        arduino3.set((i&1) == 1);
     }
 
     public void reset() {}
