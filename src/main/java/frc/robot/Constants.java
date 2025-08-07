@@ -24,8 +24,8 @@ public class Constants {
     }
 
     public static class Algae {
-        public static final int m_armID = 0;
-        public static final int m_grabberID = 0;
+        public static final int m_armID = 10;
+        public static final int m_grabberID = 5;
 
     }
 
@@ -38,20 +38,16 @@ public class Constants {
     }
 
     public static class Drive {
-        public static final int m_driveFLID = 0;
-        public static final int m_driveFRID = 0;
-        public static final int m_driveBLID = 0;
-        public static final int m_driveBRID = 0;
+        public static final int m_driveFLID = 8;
+        public static final int m_driveFRID = 6;
+        public static final int m_driveBLID = 9;
+        public static final int m_driveBRID = 7;
     }
 
     public static class Field {}
 
     public static class Led {
         public static final int l_ledID = 0;
-
-        public static final int o_arduino1ID = 7;
-        public static final int o_arduino2ID = 8;
-        public static final int o_arduino3ID = 9;
         
         public static enum StatusList {
             DISCONNECT,

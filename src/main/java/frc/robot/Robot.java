@@ -1,13 +1,10 @@
 package frc.robot;
 
-import com.ctre.phoenix6.signals.ConnectedMotorValue;
-
 import edu.wpi.first.networktables.BooleanPublisher;
 import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringPublisher;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.subsystems.commands.DriveSubsystem;
@@ -285,7 +282,7 @@ public class Robot extends TimedRobot {
     // Arcadedrive the robot using the selected drive scheme
     if (driveSchemeSelected == 0) {
       forward = controllerMap.getRightXC1();
-      rotation = -controllerMap.getLeftYC1();
+      rotation = controllerMap.getLeftYC1();
     } else if (driveSchemeSelected == 1) {
       forward = controllerMap.getRightXC2();
       rotation = -controllerMap.getLeftYC2();
