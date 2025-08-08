@@ -5,6 +5,7 @@ import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringPublisher;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.subsystems.commands.DriveSubsystem;
@@ -121,8 +122,6 @@ public class Robot extends TimedRobot {
     networkLEDStatus = ledTable.getStringTopic("LED Status").publish();
     networkLEDFlashing = ledTable.getBooleanTopic("LED's Flashing?").publish();
 
-    networkAutoRunning = autonomousTable.getStringTopic("Running Auto").publish();
-
     SmartDashboard.getBoolean("Prevent Driver Control?", preventDrive);
     SmartDashboard.getBoolean("Use Joysticks to Drive?", useJoystickDrive);
 
@@ -141,21 +140,33 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotPeriodic() {
-    // if (DriverStation.isDSAttached() == true) {  
-    //   if (ledFlashOverride == false) {
-    //     led.setStatus(ledBuffer);
-    //   }
-    // } else {
-    //   led.setStatus(Constants.Led.StatusList.DISCONNECT);
-    // }
-    led.setStatus(ledBuffer);
+    if (ledFlashOverride == false) {
+      led.setStatus(ledBuffer);
+    }
+
+    networkDriveForward.set(forward);
+    networkDriveRotation.set(rotation);
+    networkDriveSpeed.set(driveSpeedCurrent);
+    
+
+    networkElevatorPos.set(elevator.getPosition().toString());
+    networkElevatorRHeight.set(elevator.getHeightRaw());
+    networkElevatorHeight.set(elevator.getHeight());
+    networkElevatorRange.set(elevator.getTargetPosition());
+    networkElevatorEndstop.set(elevator.getEndstop());
+    
+    networkEndEffectorStatus.set(endEffector.getCoralState());
+    networkEndEffectorCoral.set(endEffector.getCoralLoaded());
+
+    networkLEDStatus.set(led.getStatus().toString());
+    networkLEDFlashing.set(led.getFlashing());
   }
 
   @Override
   public void autonomousInit() {
     autoSelected = autoChooser.getSelected();
     
-    // (autonomousTable.getStringTopic("Running Auto").publish()).set(autoSelected);
+    (autonomousTable.getStringTopic("Running Auto").publish()).set(autoSelected);
   }
 
   @Override
@@ -233,17 +244,17 @@ public class Robot extends TimedRobot {
     // if (controllerMap.isStartButtonC1Pressed()) {
       
     // }
-    // // Flash lights when Coral is first loaded.
-    // // If on this iteration Coral is loaded, and on the last iteration Coral was not loaded, flash the LED's. 
-    // if (endEffector.getCoralLoaded() && wasCoralLoaded == false) {
-    //   led.flashStatus(Constants.Led.StatusList.LOADED, 3, 0.3);
-    // }
-    // // If the lights are currently flashing, enable the override.
-    // if (led.getFlashing()) {
-    //   ledFlashOverride = true;
-    // } else {
-    //   ledFlashOverride = false;
-    // }
+    // Flash lights when Coral is first loaded.
+    // If on this iteration Coral is loaded, and on the last iteration Coral was not loaded, flash the LED's. 
+    if (endEffector.getCoralLoaded() && wasCoralLoaded == false) {
+      led.flashStatus(Constants.Led.StatusList.LOADED, 3, 0.3);
+    }
+    // If the lights are currently flashing, enable the override.
+    if (led.getFlashing()) {
+      ledFlashOverride = true;
+    } else {
+      ledFlashOverride = false;
+    }
     // // Prepare for the next iteration.
     wasCoralLoaded = endEffector.getCoralLoaded();
 
@@ -320,12 +331,16 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void disabledInit() {
-    ledBuffer = Constants.Led.StatusList.DISABLED;
-  }
+  public void disabledInit() {}
 
   @Override
-  public void disabledPeriodic() {}
+  public void disabledPeriodic() {
+    if (!DriverStation.isDSAttached()) {
+      ledBuffer = Constants.Led.StatusList.DISCONNECT;
+    } else if (DriverStation.isDSAttached()) {
+      ledBuffer = Constants.Led.StatusList.DISABLED;
+    }
+  }
 
   @Override
   public void testInit() {

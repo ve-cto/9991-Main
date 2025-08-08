@@ -26,20 +26,24 @@ public class Led {
 
     private Constants.Led.StatusList Status;
 
-    private LEDPattern robotDisconnect = LEDPattern.solid(Color.kOrangeRed);
+    private LEDPattern robotDisconnectMask = LEDPattern.steps(Map.of(0, Color.kWhite, 0.04, Color.kBlack)).scrollAtRelativeSpeed(Percent.per(Second).of(5));
+    private LEDPattern robotDisconnectBase = LEDPattern.gradient(GradientType.kContinuous, Color.kDarkRed, Color.kDarkRed).atBrightness(Percent.of(50)); 
+    private LEDPattern robotDisconnect = robotDisconnectBase.mask(robotDisconnectMask);
         
     private LEDPattern robotDisabledMask = LEDPattern.steps(Map.of(0, Color.kWhite, 0.1, Color.kBlack)).scrollAtRelativeSpeed(Percent.per(Second).of(10));
-    private LEDPattern robotDisabledBase = LEDPattern.gradient(GradientType.kContinuous, Color.kOrangeRed, Color.kDarkRed);
+    private LEDPattern robotDisabledBase = LEDPattern.gradient(GradientType.kContinuous, Color.kOrangeRed, Color.kDarkRed).atBrightness(Percent.of(50));
     private LEDPattern robotDisabled = robotDisabledBase.mask(robotDisabledMask);
 
-    private LEDPattern robotIdle = LEDPattern.gradient(GradientType.kContinuous, Color.kHotPink, Color.kLightBlue, Color.kLime).scrollAtRelativeSpeed(Percent.per(Second).of(10));
+    private LEDPattern robotIdleMask = LEDPattern.steps(Map.of(0, Color.kWhite, 0.1, Color.kBlack)).scrollAtRelativeSpeed(Percent.per(Second).of(10));
+    private LEDPattern robotIdleBase = LEDPattern.gradient(GradientType.kContinuous, Color.kBlue, Color.kPurple).scrollAtRelativeSpeed(Percent.per(Second).of(20)).atBrightness(Percent.of(60));
+    private LEDPattern robotIdle = robotIdleBase.mask(robotIdleMask);
 
     private LEDPattern robotAutonomousMask = LEDPattern.steps(Map.of(0, Color.kWhite, 0.05, Color.kBlack)).scrollAtRelativeSpeed(Percent.per(Second).of(50));
     private LEDPattern robotAutonomousBase = LEDPattern.rainbow(255, 200);
     private LEDPattern robotAutonomous = robotAutonomousBase.mask(robotAutonomousMask);
 
-    private LEDPattern robotReady = LEDPattern.solid(Color.kLime).breathe(Seconds.of(0.2));
-    private LEDPattern robotLoaded = LEDPattern.solid(Color.kLime).breathe(Seconds.of(0.5));
+    private LEDPattern robotReady = LEDPattern.solid(Color.kLime).breathe(Seconds.of(0.2)).atBrightness(Percent.of(100));
+    private LEDPattern robotLoaded = LEDPattern.solid(Color.kLime).breathe(Seconds.of(0.5)).atBrightness(Percent.of(100));
 
     private LEDPattern ledBlank = LEDPattern.solid(Color.kBlack);
 

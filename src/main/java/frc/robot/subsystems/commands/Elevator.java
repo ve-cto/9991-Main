@@ -91,9 +91,10 @@ public class Elevator {
 
     /*
      * Get the status of the homing endstop
+     * (Inverted because it's silly)
      */
     public boolean getEndstop() {
-        return s_endstop.get();
+        return !s_endstop.get();
     }
 
     // -----------------------------------------------------------------------
