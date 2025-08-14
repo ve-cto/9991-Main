@@ -46,15 +46,11 @@ public class Led {
     private LEDPattern robotAutonomousBase = LEDPattern.rainbow(255, 200);
     private LEDPattern robotAutonomous = robotAutonomousBase.mask(robotAutonomousMask);
 
-    // private LEDPattern robotReadyMask = LEDPattern.steps(Map.of(0, Color.kWhite, 0.8, Color.kBlack)).scrollAtRelativeSpeed(Percent.per(Second).of(50));
-    // private LEDPattern robotReadyBase = LEDPattern.solid(Color.kLime).breathe(Seconds.of(3)).atBrightness(Percent.of(100));
-    // private LEDPattern robotReady = robotReadyBase.mask(robotReadyMask);
-
     private LEDPattern robotReady = LEDPattern.solid(Color.kLime).breathe(Seconds.of(3)).atBrightness(Percent.of(100));
-    
+
     private LEDPattern robotLoaded = LEDPattern.solid(Color.kLime).atBrightness(Percent.of(100));
     private LEDPattern robotRelease = LEDPattern.solid(Color.kOrange).atBrightness(Percent.of(100));
-    
+
     private LEDPattern ledBlank = LEDPattern.solid(Color.kBlack);
 
     public Led() {
@@ -132,7 +128,7 @@ public class Led {
         ledOn = false;
         flashTimer.reset();
         flashTimer.start();
-        System.out.println("Started flashing: " + desiredStatus);
+        // System.out.println("Started flashing: " + desiredStatus);
     }
 
     /**
@@ -154,7 +150,7 @@ public class Led {
                 if (flashCount >= totalFlashes) {
                     isFlashing = false;
                     setStatus(Constants.Led.StatusList.BLANK);
-                    System.out.println("Flashing completed");
+                    // System.out.println("Flashing completed");
                 }
             }
         }
