@@ -51,7 +51,7 @@ public class EndEffector {
         if (!isCoralLoaded) {
             if (isCoralPastStage1 == true && isCoralLoaded == false) {
                 if (!s_break.get()) {
-                    manualShift(0.32);
+                    manualShift(0.28);
                 } else {
                     isCoralLoaded = true;
                     manualShift(0.0);

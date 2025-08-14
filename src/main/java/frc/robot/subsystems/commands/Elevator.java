@@ -188,13 +188,13 @@ public class Elevator {
             desiredHeight = 0.2;
         }
         else if (targetHeight == Position.L2) {
-            desiredHeight = 0.3;
+            desiredHeight = 0.17;
         }
         else if (targetHeight == Position.L3) {
-            desiredHeight = 0.5;
+            desiredHeight = 0.55;
         }
         else if (targetHeight == Position.L4) {
-            desiredHeight = 1;
+            desiredHeight = 1.1;
         }
 
         double pidOutput = pid.calculate(getHeight(), desiredHeight);
@@ -221,8 +221,8 @@ public class Elevator {
      * Positive speed means up, negative means down.
      */
     public void manualShift(double speed) {
-        m_elevatorLeft.set(speed);
-        m_elevatorRight.set(speed);
+        m_elevatorLeft.set(-speed);
+        m_elevatorRight.set(-speed);
     }
 
     /*

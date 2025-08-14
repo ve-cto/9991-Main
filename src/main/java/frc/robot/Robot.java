@@ -39,6 +39,8 @@ public class Robot extends TimedRobot {
   private Led led;
   private Constants.Led.StatusList ledBuffer;
   private Constants.Led.StatusList ledTeleopBuffer;
+  
+  private Timer autoTimer;
 
   private double driveSpeedCurrent;
   private double forward;
@@ -167,6 +169,10 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     autoSelected = autoChooser.getSelected();
+    autoTimer.reset();
+    autoTimer.start();
+
+
     
     (autonomousTable.getStringTopic("Running Auto").publish()).set(autoSelected);
   }
@@ -176,7 +182,6 @@ public class Robot extends TimedRobot {
     ledBuffer = Constants.Led.StatusList.AUTONOMOUS;
     switch (autoSelected) {
       case autoCustom1:
-        // code in here...
         break;
       case autoDefault:
         break;
@@ -215,17 +220,15 @@ public class Robot extends TimedRobot {
     // } else if (controllerMap.isRightDPadC1Pressed()) {
     //   elevator.gotoL4();
     // } else if (controllerMap.isDownDPadC1Pressed()) {
-    //   elevator.gotoL1();
+    //   elevator.manualShift(-0.25);
     // } else if (controllerMap.isNoDPadC1Pressed()) {
     //   elevator.hold();
-    // } else if (controllerMap.isStartButtonC1Pressed()) {
-    //   elevator.home();
     // }
 
     if (controllerMap.isUpDPadC1Pressed()) {
-      elevator.manualShift(0.4);
+      elevator.manualShift(0.5);
     } else if (controllerMap.isDownDPadC1Pressed()) {
-      elevator.manualShift(-0.2);
+      elevator.manualShift(-0.25);
     } else if (controllerMap.isNoDPadC1Pressed()) {
       elevator.hold();
     }
@@ -274,16 +277,16 @@ public class Robot extends TimedRobot {
     // ALGAE
     // -------------------------------------------------------------------------------------------------------
     if (controllerMap.isAButtonC1Pressed()) {
-      algae.manualShiftGrabber(0.6);
+      algae.manualShiftGrabber(0.5);
     } else if (controllerMap.isBButtonC1Pressed()) {
-      algae.manualShiftGrabber(-0.6);
+      algae.manualShiftGrabber(-0.5);
     } else {
       algae.stopGrabber();
     }
 
-    if (controllerMap.isXButtonC1Pressed()) {
+    if (controllerMap.isYButtonC1Pressed()) {
       algae.manualShiftArm(0.5);
-    } else if (controllerMap.isYButtonC1Pressed()) {
+    } else if (controllerMap.isXButtonC1Pressed()) {
       algae.manualShiftArm(-0.3);
     } else {
       algae.stopArm();
@@ -303,13 +306,13 @@ public class Robot extends TimedRobot {
     // }
 
     // Change the drive speed based on elevator position
-    if (elevator.getPosition().equals(Constants.Elevator.Position.HOME)) {
-      driveSpeedCurrent = Constants.Drive.driveSpeedNormal;
-    } else if (elevator.getPosition().equals(Constants.Elevator.Position.L1)) {
-      driveSpeedCurrent = Constants.Drive.driveSpeedL1;
-    } else if (elevator.getPosition().equals(Constants.Elevator.Position.L2) || elevator.getPosition().equals(Constants.Elevator.Position.L3) || elevator.getPosition().equals(Constants.Elevator.Position.L4)) {
-      driveSpeedCurrent = Constants.Drive.driveSpeedElevator;
-    }
+    // if (elevator.getPosition().equals(Constants.Elevator.Position.HOME)) {
+    //   driveSpeedCurrent = Constants.Drive.driveSpeedNormal;
+    // } else if (elevator.getPosition().equals(Constants.Elevator.Position.L1)) {
+    //   driveSpeedCurrent = Constants.Drive.driveSpeedL1;
+    // } else if (elevator.getPosition().equals(Constants.Elevator.Position.L2) || elevator.getPosition().equals(Constants.Elevator.Position.L3) || elevator.getPosition().equals(Constants.Elevator.Position.L4)) {
+    //   driveSpeedCurrent = Constants.Drive.driveSpeedElevator;
+    // }
 
     // If the driver is speeding up the robot, acknowledge their request, and bypass whatever the elevator is doing
     if ((controllerMap.isLeftTriggerC1Pressed() && !controllerMap.isRightTriggerC1Pressed()) || (!controllerMap.isLeftTriggerC1Pressed() && controllerMap.isRightTriggerC1Pressed())) {
@@ -349,9 +352,11 @@ public class Robot extends TimedRobot {
     //   System.out.println("Driving with joysticks...");
     // } 
 
-    this.forward = forward;
+    this.forward = forward * Constants.Drive.turnMultiplier;
     this.rotation = rotation;
-    driveSubsystem.drive(forward, rotation, driveSpeedCurrent); 
+    this.forward = Math.min(Math.max(this.forward, -1.0), 1.0);
+    this.rotation = Math.min(Math.max(this.rotation, -1.0), 1.0);
+    driveSubsystem.drive(this.forward, this.rotation, driveSpeedCurrent); 
     
     // Set the global buffer for LED's
     ledBuffer = ledTeleopBuffer;

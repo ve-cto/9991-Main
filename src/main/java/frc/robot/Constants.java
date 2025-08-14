@@ -12,7 +12,7 @@ public class Constants {
         public static final int m_elevatorLeftID = 1;
         public static final int m_elevatorRightID = 2;
 
-        public static final double gravityComp = 0.05;
+        public static final double gravityComp = -0.05;
         public static final double countsPer1M = 7850.0;
 
         public static final double maxSpeedDown = -0.5;
@@ -51,12 +51,14 @@ public class Constants {
         public static final int m_driveBLID = 9;
         public static final int m_driveBRID = 7;
 
-        public static final double driveSpeedElevator = 0.2;
-        public static final double driveSpeedL1 = 0.3;
-        public static final double driveSpeedNormal = 0.3;
-        public static final double driveSpeedFast = 0.5;
-        public static final double driveSpeedFaster = 0.7;
+        public static final double driveSpeedElevator = 0.4;
+        public static final double driveSpeedL1 = 0.4;
+        public static final double driveSpeedNormal = 0.6;
+        public static final double driveSpeedFast = 0.7;
+        public static final double driveSpeedFaster = 0.8;
         public static final double driveSpeedMax = 1.0;
+
+        public static final double turnMultiplier = 1.2;
     }
 
     public static class Field {}
