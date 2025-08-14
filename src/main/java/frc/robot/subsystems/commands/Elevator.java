@@ -1,6 +1,5 @@
 package frc.robot.subsystems.commands;
 
-import com.ctre.phoenix.motorcontrol.GroupMotorControllers;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -15,7 +14,7 @@ public class Elevator {
     private DigitalInput s_endstop;
     private final PIDController pid;
     private double desiredHeight;
-
+    
     private final double COUNTS_PER_1M = Constants.Elevator.countsPer1M;
     private final double GRAVITY_COMPENSATION = -Constants.Elevator.gravityComp;
     
@@ -27,6 +26,7 @@ public class Elevator {
         L4,
         UNKNOWN
     }
+
     private Position lastKnownPosition;
     private Position targetPosition;
 

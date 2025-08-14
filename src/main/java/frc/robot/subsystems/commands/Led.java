@@ -6,7 +6,6 @@ import static edu.wpi.first.units.Units.Seconds;
 
 import java.util.Map;
 
-import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.LEDPattern;
@@ -35,7 +34,7 @@ public class Led {
     private LEDPattern robotDisabled = robotDisabledBase.mask(robotDisabledMask);
 
     private LEDPattern robotIdleMask = LEDPattern.steps(Map.of(0, Color.kWhite, 0.1, Color.kBlack)).scrollAtRelativeSpeed(Percent.per(Second).of(10));
-    private LEDPattern robotIdleBase = LEDPattern.gradient(GradientType.kContinuous, Color.kBlue, Color.kPurple).scrollAtRelativeSpeed(Percent.per(Second).of(20)).atBrightness(Percent.of(60));
+    private LEDPattern robotIdleBase = LEDPattern.gradient(GradientType.kContinuous, Color.kBlue, Color.kPurple).scrollAtRelativeSpeed(Percent.per(Second).of(20)).atBrightness(Percent.of(80));
     private LEDPattern robotIdle = robotIdleBase.mask(robotIdleMask);
 
     private LEDPattern robotAutonomousMask = LEDPattern.steps(Map.of(0, Color.kWhite, 0.05, Color.kBlack)).scrollAtRelativeSpeed(Percent.per(Second).of(50));
@@ -101,9 +100,9 @@ public class Led {
     public void flashStatus(Constants.Led.StatusList desiredStatus, int numFlashes, double flashSpeed) {
         if (this.isFlashing = false) {
             this.isFlashing = true;
-            flashTimer.restart();
             System.out.println("Started to Flash");
             for (int i = 0; i < numFlashes+1; i++) {
+                flashTimer.restart();
                 if (flashTimer.get() < flashSpeed) {
                     setStatus(desiredStatus);
                 } else if (flashTimer.get() < flashSpeed * 2) {

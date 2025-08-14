@@ -1,13 +1,12 @@
 package frc.robot;
 
-import edu.wpi.first.wpilibj.Timer;
-
 public class Constants {
     public static class Robot {
-        public static double driveSpeedSlow = 0.6;
-        public static double driveSpeedNormal = 0.7;
-        public static double driveSpeedFast = 0.8;
-        public static double driveSpeedMax = 1.0;
+        public static final double driveSpeedElevator = 0.3;
+        public static final double driveSpeedSlow = 0.4;
+        public static final double driveSpeedNormal = 0.5;
+        public static final double driveSpeedFast = 0.7;
+        public static final double driveSpeedMax = 1.0;
     }
 
     public static class Elevator {
@@ -21,6 +20,15 @@ public class Constants {
 
         public static final double gravityComp = 0.05;
         public static final double countsPer1M = 7850.0;
+
+        public enum Position {
+            HOME,
+            L1,
+            L2,
+            L3,
+            L4,
+            UNKNOWN
+        }
     }
 
     public static class Algae {
@@ -30,8 +38,7 @@ public class Constants {
     }
 
     public static class EndEffector {
-        public static final int s_break1ID = 3;
-        public static final int s_break2ID = 4;
+        public static final int s_breakID = 3;
 
         public static final int m_intake1ID = 3;
         public static final int m_intake2ID = 4;

@@ -14,8 +14,8 @@ public class ControllerMap {
 
     public ControllerMap() {
         controller1 = new XboxController(0);
-        controller2 = new XboxController(2);
-        joystick = new Joystick(1);
+        controller2 = new XboxController(1);
+        joystick = new Joystick(2);
     }
 
     // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -204,6 +204,7 @@ public class ControllerMap {
     // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     public boolean isJoystickButtonPressed(int buttonNumber) {
+        System.out.println("Button number" + buttonNumber + " state: " + joystick.getRawButton(buttonNumber));
         return joystick.getRawButton(buttonNumber);
     }
 

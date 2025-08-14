@@ -1,5 +1,8 @@
 package frc.robot;
 
+import java.security.Key;
+
+import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.networktables.BooleanPublisher;
 import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.NetworkTable;
@@ -9,10 +12,8 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.subsystems.commands.DriveSubsystem;
-import frc.robot.subsystems.commands.LimelightDriveSubsystem;
 import frc.robot.subsystems.maps.ControllerMap;
 import frc.robot.subsystems.tools.MapRanges;
-import frc.robot.subsystems.maps.LimelightMap;
 import frc.robot.subsystems.commands.Elevator;
 import frc.robot.subsystems.commands.EndEffector;
 import frc.robot.subsystems.commands.Algae;
@@ -21,6 +22,7 @@ import frc.robot.subsystems.commands.Led;
 // import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 
 /**
  * The methods in this class are called automatically corresponding to each mode, as described in
@@ -31,15 +33,12 @@ public class Robot extends TimedRobot {
   private ControllerMap controllerMap;
   private DriveSubsystem driveSubsystem;
   private MapRanges mapRanges;
-  private LimelightDriveSubsystem limelightDriveSubsystem;
-  private LimelightMap limelightMap;
   private Elevator elevator;
   private EndEffector endEffector;
   private Algae algae;
   private Led led;
   private Constants.Led.StatusList ledBuffer;
   private Constants.Led.StatusList ledTeleopBuffer;
-  private Timer timer;
 
   private double driveSpeedCurrent;
   private double forward;
@@ -84,8 +83,7 @@ public class Robot extends TimedRobot {
   StringPublisher networkElevatorPos;
   DoublePublisher networkElevatorRHeight;
   DoublePublisher networkElevatorHeight;
-
-
+  BooleanPublisher networkEndEffectorLaser;
 
   public Robot() {}
 
@@ -95,8 +93,6 @@ public class Robot extends TimedRobot {
     controllerMap = new ControllerMap();
     driveSubsystem = new DriveSubsystem();
     mapRanges = new MapRanges();
-    limelightMap = new LimelightMap();
-    limelightDriveSubsystem = new LimelightDriveSubsystem();
     elevator = new Elevator();
     endEffector = new EndEffector();
     algae = new Algae();
@@ -118,6 +114,7 @@ public class Robot extends TimedRobot {
     
     networkEndEffectorStatus = endEffectorTable.getStringTopic("Intake Status").publish();
     networkEndEffectorCoral = endEffectorTable.getBooleanTopic("Coral Loaded?").publish();
+    networkEndEffectorLaser = endEffectorTable.getBooleanTopic("Endstop Status").publish();
 
     networkLEDStatus = ledTable.getStringTopic("LED Status").publish();
     networkLEDFlashing = ledTable.getBooleanTopic("LED's Flashing?").publish();
@@ -136,10 +133,12 @@ public class Robot extends TimedRobot {
 
     elevator.reset();
     ledBuffer = Constants.Led.StatusList.BLANK; 
+    CameraServer.startAutomaticCapture();
   }
 
   @Override
   public void robotPeriodic() {
+    // If the LED's aren't flashing, set the buffer. If they are, then seperate logic takes over.
     if (ledFlashOverride == false) {
       led.setStatus(ledBuffer);
     }
@@ -157,6 +156,7 @@ public class Robot extends TimedRobot {
     
     networkEndEffectorStatus.set(endEffector.getCoralState());
     networkEndEffectorCoral.set(endEffector.getCoralLoaded());
+    networkEndEffectorLaser.set(endEffector.getEndstop());
 
     networkLEDStatus.set(led.getStatus().toString());
     networkLEDFlashing.set(led.getFlashing());
@@ -231,19 +231,23 @@ public class Robot extends TimedRobot {
     // END EFFECTOR
     // -------------------------------------------------------------------------------------------------------
     if (controllerMap.isRightBumperC1Pressed()) {
-      // endEffector.intakeCoral();
-      endEffector.manualShift(0.4);
+      endEffector.releaseCoral();
+      // endEffector.manualShift(0.4);
     } else if (controllerMap.isLeftBumperC1Pressed()) {
-      // endEffector.releaseCoral();
-      endEffector.manualShift(-0.4);
+      endEffector.intakeCoral();
+      // endEffector.manualShift(-0.4);
     } else {
       endEffector.stop();
     }
 
-    // // For testing purposes, make the robot think that coral is loaded when we press the start button.
-    // if (controllerMap.isStartButtonC1Pressed()) {
-      
-    // }
+    
+    // // For testing purposes, make the robot think the coral is loaded when we press a button.
+    if (controllerMap.isJoystickButtonPressed(1)) {
+      endEffector.debugState(0);
+    } else if (controllerMap.isJoystickButtonPressed(2)) {
+      endEffector.debugState(2);
+    }
+
     // Flash lights when Coral is first loaded.
     // If on this iteration Coral is loaded, and on the last iteration Coral was not loaded, flash the LED's. 
     if (endEffector.getCoralLoaded() && wasCoralLoaded == false) {
@@ -306,8 +310,6 @@ public class Robot extends TimedRobot {
       System.out.print("Strangely, a drive scheme could not be selected, and an error occured.");
     }
 
-    
-
     // if (controllerMap.isStartButtonC1Pressed()) {
     //   // Aim and Range on Start Button
     //   limelightDriveSubsystem.aimAndRange(40);
@@ -327,6 +329,7 @@ public class Robot extends TimedRobot {
     this.rotation = rotation;
     driveSubsystem.drive(forward, rotation, driveSpeedCurrent); 
     
+    // Set the global buffer for LED's
     ledBuffer = ledTeleopBuffer;
   }
 
