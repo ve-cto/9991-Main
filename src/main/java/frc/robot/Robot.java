@@ -41,6 +41,7 @@ public class Robot extends TimedRobot {
   private Constants.Led.StatusList ledTeleopBuffer;
   
   private Timer autoTimer;
+  private String autoState;
 
   private double driveSpeedCurrent;
   private double forward;
@@ -63,6 +64,10 @@ public class Robot extends TimedRobot {
   private String autoSelected;
   private final SendableChooser<String> autoChooser = new SendableChooser<>();
 
+  private static final Boolean coralLoadedAuto = true;
+  private static final Boolean coralUnloadedAuto = false;
+  private final SendableChooser<Boolean> autoCoralChooser = new SendableChooser<>();
+
   private final NetworkTableInstance networkTableInstance = NetworkTableInstance.getDefault();
     
   private final NetworkTable driveTable = networkTableInstance.getTable("Drive");
@@ -80,6 +85,7 @@ public class Robot extends TimedRobot {
   StringPublisher networkLEDStatus;
   BooleanPublisher networkLEDFlashing;
   StringPublisher networkAutoRunning;
+  StringPublisher networkAutoState;
   DoublePublisher networkDriveRotation;
   DoublePublisher networkDriveSpeed;
   StringPublisher networkElevatorPos;
@@ -99,6 +105,8 @@ public class Robot extends TimedRobot {
     endEffector = new EndEffector();
     algae = new Algae();
     led = new Led();
+
+    autoTimer = new Timer();
     
     // set preventDrive to false on init
     this.preventDrive = false;
@@ -121,17 +129,23 @@ public class Robot extends TimedRobot {
     networkLEDStatus = ledTable.getStringTopic("LED Status").publish();
     networkLEDFlashing = ledTable.getBooleanTopic("LED's Flashing?").publish();
 
+    networkAutoState = autonomousTable.getStringTopic("Current Auto Action").publish();
+
     SmartDashboard.getBoolean("Prevent Driver Control?", preventDrive);
     SmartDashboard.getBoolean("Use Joysticks to Drive?", useJoystickDrive);
 
     autoChooser.setDefaultOption("Default Auto", autoDefault);
     autoChooser.addOption("Custom 1", autoCustom1);
-    SmartDashboard.putData("Pick an auto.", autoChooser);
+    SmartDashboard.putData("Pick an auto to run in Autonomous.", autoChooser);
 
     driveSchemeChooser.setDefaultOption("Single-Controller Control", driveSchemeDefault);
     driveSchemeChooser.addOption("Dual-Controller Control", driveSchemeDual);
     driveSchemeChooser.addOption("Joystick Control", driveSchemeJoystick);
-    SmartDashboard.putData("selectedDriveMode", driveSchemeChooser);
+    SmartDashboard.putData("How to control the robot?", driveSchemeChooser);
+
+    autoCoralChooser.setDefaultOption("Yes", coralLoadedAuto);
+    autoCoralChooser.setDefaultOption("No", coralUnloadedAuto);
+    SmartDashboard.putData("Is coral loaded in the robot for Autonomous?", autoCoralChooser);
 
     elevator.reset();
     ledBuffer = Constants.Led.StatusList.BLANK; 
@@ -140,6 +154,28 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotPeriodic() {
+    // // For testing purposes, make the robot think the coral is loaded when we press a button.
+    if (controllerMap.isJoystickButtonPressed(1)) {
+      endEffector.debugState(0);
+    } else if (controllerMap.isJoystickButtonPressed(2)) {
+      endEffector.debugState(1);
+    } else if (controllerMap.isJoystickButtonPressed(3)) {
+      endEffector.debugState(2);
+    }
+
+    // Flash lights when Coral is first loaded.
+    // If on this iteration Coral is loaded, and on the last iteration Coral was not loaded, flash the LED's. 
+    if (endEffector.getCoralLoaded() && wasCoralLoaded == false) {
+      led.startFlashing(Constants.Led.StatusList.LOADED, 3, 0.1);
+    }
+    // If on this iteration Coral is NOT loaded, and on the last iteration WAS loaded, flash.
+    if (!endEffector.getCoralLoaded() && wasCoralLoaded == true) {
+      led.startFlashing(Constants.Led.StatusList.RELEASE, 3, 0.1);
+    }
+
+    // Prepare for the next iteration.
+    wasCoralLoaded = endEffector.getCoralLoaded();
+
     // If the LED's aren't flashing, set the buffer. If they are, then seperate logic takes over.
     if (led.getFlashing()) {
       led.updateFlashing();    
@@ -169,26 +205,64 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     autoSelected = autoChooser.getSelected();
-    autoTimer.reset();
+
     autoTimer.start();
-
-
-    
+    autoTimer.restart();
     (autonomousTable.getStringTopic("Running Auto").publish()).set(autoSelected);
+
+    if (autoCoralChooser.getSelected()) {
+      endEffector.debugState(2);
+    }
   }
 
-  @Override
   public void autonomousPeriodic() {
     ledBuffer = Constants.Led.StatusList.AUTONOMOUS;
+    autoState = "Idle";
+
     switch (autoSelected) {
       case autoCustom1:
+        // Custom auto here (keep calling subsystem methods every loop to feed MotorSafety)
         break;
-      case autoDefault:
+  
+      case autoDefault: {
+        double t = autoTimer.get();
+        algae.stopArm();
+        algae.stopGrabber();
+        elevator.hold();
+  
+        if (t < 5.0) {
+          // 0–5s: intake
+          autoState = "Intaking";
+          endEffector.intakeCoral();
+          // Feed drivetrain even when stationary
+          driveSubsystem.drive(0.0, 0.0, 1.0);
+        } else if (t < 7.0) {
+          // 5–7s: drive forward at 50%
+          autoState = "Driving";
+          endEffector.stop();
+          driveSubsystem.drive(0.5, 0.0, 1.0); // 50% forward, no turn
+        } else if (t < 9.0) {
+          // 7–9s: release
+          autoState = "Releasing";
+          endEffector.releaseCoral();
+          // Hold position and keep feeding drivetrain
+          driveSubsystem.drive(0.0, 0.0, 1.0);
+        } else {
+          // >9s: stop everything, keep feeding
+          autoState = "Stopped";
+          endEffector.stop();
+          driveSubsystem.drive(0.0, 0.0, 1.0);
+        }
         break;
+      }
+  
       default:
-        // code in here...
+        // Safety fallback: stop and feed
+        endEffector.stop();
+        driveSubsystem.drive(0.0, 0.0, 1.0);
         break;
-    }
+      }
+      networkAutoState.set(autoState);
   }
 
   @Override
@@ -246,32 +320,10 @@ public class Robot extends TimedRobot {
       endEffector.stop();
     }
 
-    // // For testing purposes, make the robot think the coral is loaded when we press a button.
-    if (controllerMap.isJoystickButtonPressed(1)) {
-      endEffector.debugState(0);
-    } else if (controllerMap.isJoystickButtonPressed(2)) {
-      endEffector.debugState(1);
-    } else if (controllerMap.isJoystickButtonPressed(3)) {
-      endEffector.debugState(2);
-    }
-
-    // Flash lights when Coral is first loaded.
-    // If on this iteration Coral is loaded, and on the last iteration Coral was not loaded, flash the LED's. 
-    if (endEffector.getCoralLoaded() && wasCoralLoaded == false) {
-      led.startFlashing(Constants.Led.StatusList.LOADED, 3, 0.1);
-    }
-    // If on this iteration Coral is NOT loaded, and on the last iteration WAS loaded, flash.
-    if (!endEffector.getCoralLoaded() && wasCoralLoaded == true) {
-      led.startFlashing(Constants.Led.StatusList.RELEASE, 3, 0.1);
-    }
-
     // If Coral's loaded, set LED's to ready. (Does not overwrite flashes)
     if (endEffector.getCoralLoaded()) {
       ledTeleopBuffer = Constants.Led.StatusList.READY;
     }
-
-    // Prepare for the next iteration.
-    wasCoralLoaded = endEffector.getCoralLoaded();
 
     // -------------------------------------------------------------------------------------------------------
     // ALGAE
@@ -316,9 +368,9 @@ public class Robot extends TimedRobot {
 
     // If the driver is speeding up the robot, acknowledge their request, and bypass whatever the elevator is doing
     if ((controllerMap.isLeftTriggerC1Pressed() && !controllerMap.isRightTriggerC1Pressed()) || (!controllerMap.isLeftTriggerC1Pressed() && controllerMap.isRightTriggerC1Pressed())) {
-      driveSpeedCurrent = Constants.Drive.driveSpeedNormal;
-    } else if (controllerMap.isLeftTriggerC1Pressed() && controllerMap.isRightTriggerC1Pressed()) {
       driveSpeedCurrent = Constants.Drive.driveSpeedFast;
+    } else if (controllerMap.isLeftTriggerC1Pressed() && controllerMap.isRightTriggerC1Pressed()) {
+      driveSpeedCurrent = Constants.Drive.driveSpeedFaster;
     }
 
     // Arcadedrive the robot using the selected drive scheme
@@ -335,7 +387,6 @@ public class Robot extends TimedRobot {
       rotation = 0;
       System.out.print("Strangely, a drive scheme could not be selected, and an error occured.");
     }
-
     
     // if (controllerMap.isStartButtonC1Pressed()) {
     //   // Aim and Range on Start Button
