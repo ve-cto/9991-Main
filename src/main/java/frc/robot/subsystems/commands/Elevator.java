@@ -50,7 +50,7 @@ public class Elevator {
         // kP controls how quickly motor operands are set, when the heading isn't the desired value.
         // kI 
         // kD gives the controller an extra "nudge", in case it never reaches it's target value.
-        pid = new PIDController(1, 0.9, 0.0);
+        pid = new PIDController(Constants.Elevator.kp, Constants.Elevator.ki, Constants.Elevator.kd);
     }
 
     // -----------------------------------------------------------------------
@@ -120,18 +120,16 @@ public class Elevator {
      */
     public void home() {
         targetPosition = Position.HOME;
-        if (!s_endstop.get() && getHeight() > 3.1) {
+        if (!s_endstop.get() && getHeight() > 0.2) {
             setPosition(targetPosition);
         
-        } else if (!s_endstop.get() && getHeight() < 3.1) {
-            manualShift(0.05);
+        } else if (!s_endstop.get() && getHeight() < 0.2) {
+            manualShift(-0.1);
         
         } else {
-            m_elevatorLeft.set(0.0);
-            m_elevatorRight.set(0.0);
+            manualShift(0.0);
             reset();
         }
-        feed();
     }
 
     /*
@@ -185,35 +183,37 @@ public class Elevator {
      */
     public void setPosition(Position targetHeight) {
         if (targetHeight == Position.HOME) {
-            desiredHeight = 0;
-        }
-        else if (targetHeight == Position.UNKNOWN) {
-            desiredHeight = 0.6;
-        }
-        else if (targetHeight == Position.L1) {
-            desiredHeight = 0.06;
+            desiredHeight = 0.1;
+        } else if (targetHeight == Position.L1) {
+            desiredHeight = 0.2;
         }
         else if (targetHeight == Position.L2) {
-            desiredHeight = 0.135;
+            desiredHeight = 0.3;
         }
         else if (targetHeight == Position.L3) {
-            desiredHeight = 0.51;
+            desiredHeight = 0.5;
         }
         else if (targetHeight == Position.L4) {
-            desiredHeight = 1.1;
+            desiredHeight = 1;
         }
 
         double pidOutput = pid.calculate(getHeight(), desiredHeight);
         
-        // Add gravity compensation
-        // The sign is positive because we need to work against gravity
-        // You might need to flip the sign depending on your motor polarity
-        double motorOutput = pidOutput + GRAVITY_COMPENSATION;
-        // Clamp the output to valid range
-        motorOutput = Math.min(Math.max(motorOutput, -1.0), 1.0);
+        // Clamp output to the elevator's MAX and MIN
+        double motorOutput = Math.min(Math.max(pidOutput, Constants.Elevator.maxSpeedDown), Constants.Elevator.maxSpeedUp);
         
-        m_elevatorLeft.set(-motorOutput);  
-        m_elevatorRight.set(-motorOutput);
+        // Add gravity compensation
+        motorOutput = pidOutput + GRAVITY_COMPENSATION;
+        
+        // Clamp the output (again) to valid range
+        motorOutput = Math.min(Math.max(motorOutput, -1.0), 1.0);
+
+        // If the elevator is within the set range of the target height, set the last known position to that height. (it's approximately there)
+        if (motorOutput < 0.1 && motorOutput > -0.1) {
+            lastKnownPosition = targetHeight;
+        } 
+        
+        manualShift(motorOutput);
     }
 
     /*
@@ -221,16 +221,15 @@ public class Elevator {
      * Positive speed means up, negative means down.
      */
     public void manualShift(double speed) {
-        m_elevatorLeft.set(-speed);
-        m_elevatorRight.set(-speed);
+        m_elevatorLeft.set(speed);
+        m_elevatorRight.set(speed);
     }
 
     /*
      * Hold the current elevator position, using gravity compensation.
      */
     public void hold() {
-        m_elevatorLeft.set(GRAVITY_COMPENSATION);
-        m_elevatorRight.set(GRAVITY_COMPENSATION);
+        manualShift(GRAVITY_COMPENSATION);
     }
 
     /*

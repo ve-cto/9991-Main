@@ -38,7 +38,7 @@ public class Led {
     private LEDPattern robotDisabledBase = LEDPattern.gradient(GradientType.kContinuous, Color.kOrangeRed, Color.kDarkRed).atBrightness(Percent.of(50));
     private LEDPattern robotDisabled = robotDisabledBase.mask(robotDisabledMask);
 
-    private LEDPattern robotIdleMask = LEDPattern.steps(Map.of(0, Color.kWhite, 0.5, Color.kBlack)).scrollAtRelativeSpeed(Percent.per(Second).of(10));
+    private LEDPattern robotIdleMask = LEDPattern.steps(Map.of(0, Color.kWhite, 0.75, Color.kBlack)).scrollAtRelativeSpeed(Percent.per(Second).of(10));
     private LEDPattern robotIdleBase = LEDPattern.gradient(GradientType.kContinuous, Color.kBlue, Color.kPurple).scrollAtRelativeSpeed(Percent.per(Second).of(20)).atBrightness(Percent.of(80));
     private LEDPattern robotIdle = robotIdleBase.mask(robotIdleMask);
 
@@ -51,8 +51,10 @@ public class Led {
     // private LEDPattern robotReady = robotReadyBase.mask(robotReadyMask);
 
     private LEDPattern robotReady = LEDPattern.solid(Color.kLime).breathe(Seconds.of(3)).atBrightness(Percent.of(100));
+    
     private LEDPattern robotLoaded = LEDPattern.solid(Color.kLime).atBrightness(Percent.of(100));
-
+    private LEDPattern robotRelease = LEDPattern.solid(Color.kOrange).atBrightness(Percent.of(100));
+    
     private LEDPattern ledBlank = LEDPattern.solid(Color.kBlack);
 
     public Led() {
@@ -94,10 +96,14 @@ public class Led {
             case READY:
                 robotReady.applyTo(this.l_ledBuffer);
                 break;
+            case RELEASE:
+                robotRelease.applyTo(this.l_ledBuffer);
+                break;
             case BLANK:
                 ledBlank.applyTo(this.l_ledBuffer);
                 break;
         }
+
         l_led.setData(this.l_ledBuffer);
     }
 
@@ -105,17 +111,28 @@ public class Led {
      * Start flashing without blocking the main loop
      */
     public void startFlashing(Constants.Led.StatusList desiredStatus, int numFlashes, double speed) {
-        if (!isFlashing) {
-            isFlashing = true;
-            flashCount = 0;
-            totalFlashes = numFlashes;
-            flashSpeed = speed;
-            flashStatus = desiredStatus;
-            ledOn = false;
-            flashTimer.reset();
-            flashTimer.start();
-            System.out.println("Started flashing: " + desiredStatus);
-        }
+        // if (!isFlashing) {
+        //     isFlashing = true;
+        //     flashCount = 0;
+        //     totalFlashes = numFlashes;
+        //     flashSpeed = speed;
+        //     flashStatus = desiredStatus;
+        //     ledOn = false;
+        //     flashTimer.reset();
+        //     flashTimer.start();
+        //     System.out.println("Started flashing: " + desiredStatus);
+        // }
+    
+        // If startFlashing is retriggered, reset.
+        isFlashing = true;
+        flashCount = 0;
+        totalFlashes = numFlashes;
+        flashSpeed = speed;
+        flashStatus = desiredStatus;
+        ledOn = false;
+        flashTimer.reset();
+        flashTimer.start();
+        System.out.println("Started flashing: " + desiredStatus);
     }
 
     /**

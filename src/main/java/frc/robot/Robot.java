@@ -193,6 +193,7 @@ public class Robot extends TimedRobot {
     elevator.reset();
   }
 
+  @SuppressWarnings("unlikely-arg-type")
   @Override
   public void teleopPeriodic() {
     ledTeleopBuffer = Constants.Led.StatusList.IDLE;
@@ -200,7 +201,7 @@ public class Robot extends TimedRobot {
     // Reset the driving vars
     double forward = 0.0;
     double rotation = 0.0;
-    driveSpeedCurrent = Constants.Robot.driveSpeedNormal;
+    driveSpeedCurrent = Constants.Drive.driveSpeedNormal;
 
 
     // -------------------------------------------------------------------------------------------------------
@@ -254,14 +255,19 @@ public class Robot extends TimedRobot {
     // Flash lights when Coral is first loaded.
     // If on this iteration Coral is loaded, and on the last iteration Coral was not loaded, flash the LED's. 
     if (endEffector.getCoralLoaded() && wasCoralLoaded == false) {
-      led.startFlashing(Constants.Led.StatusList.LOADED, 5, 0.1);
+      led.startFlashing(Constants.Led.StatusList.LOADED, 3, 0.1);
+    }
+    // If on this iteration Coral is NOT loaded, and on the last iteration WAS loaded, flash.
+    if (!endEffector.getCoralLoaded() && wasCoralLoaded == true) {
+      led.startFlashing(Constants.Led.StatusList.RELEASE, 3, 0.1);
     }
 
+    // If Coral's loaded, set LED's to ready. (Does not overwrite flashes)
     if (endEffector.getCoralLoaded()) {
       ledTeleopBuffer = Constants.Led.StatusList.READY;
     }
 
-    // // Prepare for the next iteration.
+    // Prepare for the next iteration.
     wasCoralLoaded = endEffector.getCoralLoaded();
 
     // -------------------------------------------------------------------------------------------------------
@@ -286,32 +292,48 @@ public class Robot extends TimedRobot {
     // -------------------------------------------------------------------------------------------------------
     // DRIVE
     // -------------------------------------------------------------------------------------------------------
-    // Handle Triggers for Drive Speed
-    if (controllerMap.isLeftTriggerC1Pressed() && !controllerMap.isRightTriggerC1Pressed()) {
-      driveSpeedCurrent = Constants.Robot.driveSpeedSlow;
-    } else if (controllerMap.isRightTriggerC1Pressed() && !controllerMap.isLeftTriggerC1Pressed()) {
-      driveSpeedCurrent = Constants.Robot.driveSpeedFast;
+    // // Handle Triggers for Drive Speed
+    // if (controllerMap.isLeftTriggerC1Pressed() && !controllerMap.isRightTriggerC1Pressed()) {
+    //   driveSpeedCurrent = Constants.Robot.driveSpeedSlow;
+    // } else if (controllerMap.isRightTriggerC1Pressed() && !controllerMap.isLeftTriggerC1Pressed()) {
+    //   driveSpeedCurrent = Constants.Robot.driveSpeedFast;
+    // } else if (controllerMap.isLeftTriggerC1Pressed() && controllerMap.isRightTriggerC1Pressed()) {
+    //   // If both of the triggers are held at the same time, max the motors.
+    //   driveSpeedCurrent = Constants.Robot.driveSpeedMax;
+    // }
+
+    // Change the drive speed based on elevator position
+    if (elevator.getPosition().equals(Constants.Elevator.Position.HOME)) {
+      driveSpeedCurrent = Constants.Drive.driveSpeedNormal;
+    } else if (elevator.getPosition().equals(Constants.Elevator.Position.L1)) {
+      driveSpeedCurrent = Constants.Drive.driveSpeedL1;
+    } else if (elevator.getPosition().equals(Constants.Elevator.Position.L2) || elevator.getPosition().equals(Constants.Elevator.Position.L3) || elevator.getPosition().equals(Constants.Elevator.Position.L4)) {
+      driveSpeedCurrent = Constants.Drive.driveSpeedElevator;
+    }
+
+    // If the driver is speeding up the robot, acknowledge their request, and bypass whatever the elevator is doing
+    if ((controllerMap.isLeftTriggerC1Pressed() && !controllerMap.isRightTriggerC1Pressed()) || (!controllerMap.isLeftTriggerC1Pressed() && controllerMap.isRightTriggerC1Pressed())) {
+      driveSpeedCurrent = Constants.Drive.driveSpeedNormal;
     } else if (controllerMap.isLeftTriggerC1Pressed() && controllerMap.isRightTriggerC1Pressed()) {
-      // If both of the triggers are held at the same time, max the motors.
-      driveSpeedCurrent = Constants.Robot.driveSpeedMax;
+      driveSpeedCurrent = Constants.Drive.driveSpeedFast;
     }
 
     // Arcadedrive the robot using the selected drive scheme
     if (driveSchemeSelected == 0) {
+      // Single Controller
       forward = controllerMap.getRightXC1();
       rotation = controllerMap.getLeftYC1();
     } else if (driveSchemeSelected == 1) {
+      // Two Controller
       forward = controllerMap.getRightXC2();
       rotation = -controllerMap.getLeftYC2();
-    } else if (driveSchemeSelected == 2) {
-      forward = controllerMap.getJoystickAxes(0);
-      rotation = controllerMap.getJoystickAxes(1);
     } else {
       forward = 0;
       rotation = 0;
       System.out.print("Strangely, a drive scheme could not be selected, and an error occured.");
     }
 
+    
     // if (controllerMap.isStartButtonC1Pressed()) {
     //   // Aim and Range on Start Button
     //   limelightDriveSubsystem.aimAndRange(40);

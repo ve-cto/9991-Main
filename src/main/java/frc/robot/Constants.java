@@ -1,13 +1,7 @@
 package frc.robot;
 
 public class Constants {
-    public static class Robot {
-        public static final double driveSpeedElevator = 0.3;
-        public static final double driveSpeedSlow = 0.4;
-        public static final double driveSpeedNormal = 0.5;
-        public static final double driveSpeedFast = 0.7;
-        public static final double driveSpeedMax = 1.0;
-    }
+    public static class Robot {}
 
     public static class Elevator {
         public static final int sEncoderID1 = 0;
@@ -20,6 +14,13 @@ public class Constants {
 
         public static final double gravityComp = 0.05;
         public static final double countsPer1M = 7850.0;
+
+        public static final double maxSpeedDown = -0.5;
+        public static final double maxSpeedUp = 0.6;
+
+        public static final double kp = 1.0;
+        public static final double ki = 0.0;
+        public static final double kd = 0.0;
 
         public enum Position {
             HOME,
@@ -49,6 +50,13 @@ public class Constants {
         public static final int m_driveFRID = 6;
         public static final int m_driveBLID = 9;
         public static final int m_driveBRID = 7;
+
+        public static final double driveSpeedElevator = 0.2;
+        public static final double driveSpeedL1 = 0.3;
+        public static final double driveSpeedNormal = 0.3;
+        public static final double driveSpeedFast = 0.5;
+        public static final double driveSpeedFaster = 0.7;
+        public static final double driveSpeedMax = 1.0;
     }
 
     public static class Field {}
@@ -63,6 +71,7 @@ public class Constants {
             AUTONOMOUS,
             LOADED,
             READY,
+            RELEASE,
             BLANK
         }
     }
