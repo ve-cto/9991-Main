@@ -18,6 +18,11 @@ import frc.robot.Constants;
 public class Led {
     private Timer flashTimer;
     private boolean isFlashing;
+    private int flashCount;
+    private int totalFlashes;
+    private double flashSpeed;
+    private Constants.Led.StatusList flashStatus;
+    private boolean ledOn;
     
     private AddressableLED l_led;
 
@@ -33,7 +38,7 @@ public class Led {
     private LEDPattern robotDisabledBase = LEDPattern.gradient(GradientType.kContinuous, Color.kOrangeRed, Color.kDarkRed).atBrightness(Percent.of(50));
     private LEDPattern robotDisabled = robotDisabledBase.mask(robotDisabledMask);
 
-    private LEDPattern robotIdleMask = LEDPattern.steps(Map.of(0, Color.kWhite, 0.1, Color.kBlack)).scrollAtRelativeSpeed(Percent.per(Second).of(10));
+    private LEDPattern robotIdleMask = LEDPattern.steps(Map.of(0, Color.kWhite, 0.5, Color.kBlack)).scrollAtRelativeSpeed(Percent.per(Second).of(10));
     private LEDPattern robotIdleBase = LEDPattern.gradient(GradientType.kContinuous, Color.kBlue, Color.kPurple).scrollAtRelativeSpeed(Percent.per(Second).of(20)).atBrightness(Percent.of(80));
     private LEDPattern robotIdle = robotIdleBase.mask(robotIdleMask);
 
@@ -41,22 +46,22 @@ public class Led {
     private LEDPattern robotAutonomousBase = LEDPattern.rainbow(255, 200);
     private LEDPattern robotAutonomous = robotAutonomousBase.mask(robotAutonomousMask);
 
-    private LEDPattern robotReady = LEDPattern.solid(Color.kLime).breathe(Seconds.of(0.2)).atBrightness(Percent.of(100));
-    private LEDPattern robotLoaded = LEDPattern.solid(Color.kLime).breathe(Seconds.of(0.5)).atBrightness(Percent.of(100));
+    // private LEDPattern robotReadyMask = LEDPattern.steps(Map.of(0, Color.kWhite, 0.8, Color.kBlack)).scrollAtRelativeSpeed(Percent.per(Second).of(50));
+    // private LEDPattern robotReadyBase = LEDPattern.solid(Color.kLime).breathe(Seconds.of(3)).atBrightness(Percent.of(100));
+    // private LEDPattern robotReady = robotReadyBase.mask(robotReadyMask);
+
+    private LEDPattern robotReady = LEDPattern.solid(Color.kLime).breathe(Seconds.of(3)).atBrightness(Percent.of(100));
+    private LEDPattern robotLoaded = LEDPattern.solid(Color.kLime).atBrightness(Percent.of(100));
 
     private LEDPattern ledBlank = LEDPattern.solid(Color.kBlack);
 
     public Led() {
         l_led = new AddressableLED(Constants.Led.l_ledID);
-    
         l_ledBuffer = new AddressableLEDBuffer(150);
-        
         l_led.setLength(l_ledBuffer.getLength());
-
         l_led.setData(l_ledBuffer);
-
         this.isFlashing = false;
-
+        this.flashTimer = new Timer(); // <-- important!
         l_led.start();
     }
 
@@ -94,31 +99,56 @@ public class Led {
                 break;
         }
         l_led.setData(this.l_ledBuffer);
-        // System.out.println("LED's Status has been changed to: " + desiredStatus.toString());
     }
 
-    public void flashStatus(Constants.Led.StatusList desiredStatus, int numFlashes, double flashSpeed) {
-        if (this.isFlashing = false) {
-            this.isFlashing = true;
-            System.out.println("Started to Flash");
-            for (int i = 0; i < numFlashes+1; i++) {
-                flashTimer.restart();
-                if (flashTimer.get() < flashSpeed) {
-                    setStatus(desiredStatus);
-                } else if (flashTimer.get() < flashSpeed * 2) {
-                    setStatus(Constants.Led.StatusList.BLANK);
+    /**
+     * Start flashing without blocking the main loop
+     */
+    public void startFlashing(Constants.Led.StatusList desiredStatus, int numFlashes, double speed) {
+        if (!isFlashing) {
+            isFlashing = true;
+            flashCount = 0;
+            totalFlashes = numFlashes;
+            flashSpeed = speed;
+            flashStatus = desiredStatus;
+            ledOn = false;
+            flashTimer.reset();
+            flashTimer.start();
+            System.out.println("Started flashing: " + desiredStatus);
+        }
+    }
+
+    /**
+     * Call this every loop in robotPeriodic or teleopPeriodic
+     */
+    public void updateFlashing() {
+        if (isFlashing) {
+            if (flashTimer.get() >= flashSpeed) {
+                flashTimer.reset();
+                ledOn = !ledOn;
+
+                if (ledOn) {
+                    setStatus(flashStatus);
                 } else {
-                    flashTimer.restart();
+                    setStatus(Constants.Led.StatusList.BLANK);
+                    flashCount++;
+                }
+
+                if (flashCount >= totalFlashes) {
+                    isFlashing = false;
+                    setStatus(Constants.Led.StatusList.BLANK);
+                    System.out.println("Flashing completed");
                 }
             }
-            System.out.println("Flashing Completed");
-            this.isFlashing = false;
         }
     }
 
     public boolean getFlashing() {
-        return (this.isFlashing);
+        return this.isFlashing;
     }
 
     public void reset() {}
 }
+
+
+

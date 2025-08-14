@@ -103,7 +103,7 @@ public class EndEffector {
         } else if (state == 1) {
             isCoralLoaded = false;
             isCoralPastStage1 = true;
-        } else if (state == 3) {
+        } else if (state == 2) {
             isCoralLoaded = true;
             isCoralPastStage1 = false;
         }

@@ -204,7 +204,7 @@ public class ControllerMap {
     // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     public boolean isJoystickButtonPressed(int buttonNumber) {
-        System.out.println("Button number" + buttonNumber + " state: " + joystick.getRawButton(buttonNumber));
+        // System.out.println("Button number" + buttonNumber + " state: " + joystick.getRawButton(buttonNumber));
         return joystick.getRawButton(buttonNumber);
     }
 

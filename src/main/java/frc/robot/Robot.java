@@ -139,7 +139,9 @@ public class Robot extends TimedRobot {
   @Override
   public void robotPeriodic() {
     // If the LED's aren't flashing, set the buffer. If they are, then seperate logic takes over.
-    if (ledFlashOverride == false) {
+    if (led.getFlashing()) {
+      led.updateFlashing();    
+    } else {
       led.setStatus(ledBuffer);
     }
 
@@ -240,25 +242,25 @@ public class Robot extends TimedRobot {
       endEffector.stop();
     }
 
-    
     // // For testing purposes, make the robot think the coral is loaded when we press a button.
     if (controllerMap.isJoystickButtonPressed(1)) {
       endEffector.debugState(0);
     } else if (controllerMap.isJoystickButtonPressed(2)) {
+      endEffector.debugState(1);
+    } else if (controllerMap.isJoystickButtonPressed(3)) {
       endEffector.debugState(2);
     }
 
     // Flash lights when Coral is first loaded.
     // If on this iteration Coral is loaded, and on the last iteration Coral was not loaded, flash the LED's. 
     if (endEffector.getCoralLoaded() && wasCoralLoaded == false) {
-      led.flashStatus(Constants.Led.StatusList.LOADED, 3, 0.3);
+      led.startFlashing(Constants.Led.StatusList.LOADED, 5, 0.1);
     }
-    // If the lights are currently flashing, enable the override.
-    if (led.getFlashing()) {
-      ledFlashOverride = true;
-    } else {
-      ledFlashOverride = false;
+
+    if (endEffector.getCoralLoaded()) {
+      ledTeleopBuffer = Constants.Led.StatusList.READY;
     }
+
     // // Prepare for the next iteration.
     wasCoralLoaded = endEffector.getCoralLoaded();
 
