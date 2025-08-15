@@ -7,7 +7,7 @@ import edu.wpi.first.wpilibj.XboxController;
 public class ControllerMap {
     private XboxController controller1;
     private XboxController controller2;
-    private Joystick joystick;
+    // private Joystick joystick;
     private final double triggerThreshold = 0.5;
     private double axisValue;
 
@@ -15,7 +15,7 @@ public class ControllerMap {
     public ControllerMap() {
         controller1 = new XboxController(0);
         controller2 = new XboxController(1);
-        joystick = new Joystick(2);
+        // joystick = new Joystick(2);
     }
 
     // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -203,18 +203,18 @@ public class ControllerMap {
 
     // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public boolean isJoystickButtonPressed(int buttonNumber) {
-        // System.out.println("Button number" + buttonNumber + " state: " + joystick.getRawButton(buttonNumber));
-        return joystick.getRawButton(buttonNumber);
-    }
+    // public boolean isJoystickButtonPressed(int buttonNumber) {
+    //     // System.out.println("Button number" + buttonNumber + " state: " + joystick.getRawButton(buttonNumber));
+    //     return joystick.getRawButton(buttonNumber);
+    // }
 
-    public double getJoystickAxes(int axisNumber) {
-        axisValue = joystick.getRawAxis(axisNumber);
-        return axisValue;
-    }
+    // public double getJoystickAxes(int axisNumber) {
+    //     axisValue = joystick.getRawAxis(axisNumber);
+    //     return axisValue;
+    // }
 
-    public double getAxisCount() {
-        return joystick.getAxisCount();
-    }
+    // public double getAxisCount() {
+    //     return joystick.getAxisCount();
+    // }
 
 }

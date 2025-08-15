@@ -155,13 +155,13 @@ public class Robot extends TimedRobot {
   @Override
   public void robotPeriodic() {
     // // For testing purposes, make the robot think the coral is loaded when we press a button.
-    if (controllerMap.isJoystickButtonPressed(1)) {
-      endEffector.debugState(0);
-    } else if (controllerMap.isJoystickButtonPressed(2)) {
-      endEffector.debugState(1);
-    } else if (controllerMap.isJoystickButtonPressed(3)) {
-      endEffector.debugState(2);
-    }
+    // if (controllerMap.isJoystickButtonPressed(1)) {
+    //   endEffector.debugState(0);
+    // } else if (controllerMap.isJoystickButtonPressed(2)) {
+    //   endEffector.debugState(1);
+    // } else if (controllerMap.isJoystickButtonPressed(3)) {
+    //   endEffector.debugState(2);
+    // }
 
     // Flash lights when Coral is first loaded.
     // If on this iteration Coral is loaded, and on the last iteration Coral was not loaded, flash the LED's. 
@@ -277,7 +277,7 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
     ledTeleopBuffer = Constants.Led.StatusList.IDLE;
 
-    System.out.println(DriverStation.getAlliance().toString());
+    // System.out.println(DriverStation.getAlliance().toString());
     
     // if (DriverStation.getAlliance().toString() == "Optional[Red]") {
     //   ledTeleopBuffer = Constants.Led.StatusList.IDLERED;
@@ -295,25 +295,25 @@ public class Robot extends TimedRobot {
     // ELEVATOR
     // -------------------------------------------------------------------------------------------------------
     
-    // if (controllerMap.isLeftDPadC1Pressed()) {
-    //   elevator.gotoL2();
-    // } else if (controllerMap.isUpDPadC1Pressed()) {
-    //   elevator.gotoL3();
-    // } else if (controllerMap.isRightDPadC1Pressed()) {
-    //   elevator.gotoL4();
-    // } else if (controllerMap.isDownDPadC1Pressed()) {
-    //   elevator.manualShift(-0.25);
-    // } else if (controllerMap.isNoDPadC1Pressed()) {
-    //   elevator.hold();
-    // }
-
-    if (controllerMap.isUpDPadC1Pressed()) {
-      elevator.manualShift(0.5);
+    if (controllerMap.isLeftDPadC1Pressed()) {
+      elevator.gotoL2();
+    } else if (controllerMap.isUpDPadC1Pressed()) {
+      elevator.gotoL3();
+    } else if (controllerMap.isRightDPadC1Pressed()) {
+      elevator.gotoL4();
     } else if (controllerMap.isDownDPadC1Pressed()) {
       elevator.manualShift(-0.25);
     } else if (controllerMap.isNoDPadC1Pressed()) {
       elevator.hold();
     }
+
+    // if (controllerMap.isUpDPadC1Pressed()) {
+    //   elevator.manualShift(0.5);
+    // } else if (controllerMap.isDownDPadC1Pressed()) {
+    //   elevator.manualShift(-0.25);
+    // } else if (controllerMap.isNoDPadC1Pressed()) {
+    //   elevator.hold();
+    // }
     
     // -------------------------------------------------------------------------------------------------------
     // END EFFECTOR

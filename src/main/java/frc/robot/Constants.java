@@ -15,12 +15,12 @@ public class Constants {
         public static final double gravityComp = -0.05;
         public static final double countsPer1M = 7850.0;
 
-        public static final double maxSpeedDown = -0.5;
-        public static final double maxSpeedUp = 0.6;
+        public static final double maxSpeedDown = -0.4;
+        public static final double maxSpeedUp = 0.7;
 
-        public static final double kp = 1.0;
+        public static final double kp = 3.0;
         public static final double ki = 0.0;
-        public static final double kd = 0.0;
+        public static final double kd = 0.7;
 
         public enum Position {
             HOME,

@@ -185,34 +185,35 @@ public class Elevator {
         if (targetHeight == Position.HOME) {
             desiredHeight = 0.1;
         } else if (targetHeight == Position.L1) {
-            desiredHeight = 0.2;
+            desiredHeight = 0.24;
         }
         else if (targetHeight == Position.L2) {
-            desiredHeight = 0.17;
+            desiredHeight = 0.21;
         }
         else if (targetHeight == Position.L3) {
-            desiredHeight = 0.55;
+            desiredHeight = 0.6;
         }
         else if (targetHeight == Position.L4) {
-            desiredHeight = 1.1;
+            desiredHeight = 1.24;
         }
 
         double pidOutput = pid.calculate(getHeight(), desiredHeight);
         
         // Clamp output to the elevator's MAX and MIN
-        double motorOutput = Math.min(Math.max(pidOutput, Constants.Elevator.maxSpeedDown), Constants.Elevator.maxSpeedUp);
+        // double motorOutput = Math.max(Constants.Elevator.maxSpeedDown, Math.min(pidOutput, Constants.Elevator.maxSpeedUp));
+
         
         // Add gravity compensation
-        motorOutput = pidOutput + GRAVITY_COMPENSATION;
+        double compensatedOutput = pidOutput + GRAVITY_COMPENSATION;
         
-        // Clamp the output (again) to valid range
-        motorOutput = Math.min(Math.max(motorOutput, -1.0), 1.0);
+        double motorOutput = Math.max(Constants.Elevator.maxSpeedDown, Math.min(compensatedOutput, Constants.Elevator.maxSpeedUp));
 
         // If the elevator is within the set range of the target height, set the last known position to that height. (it's approximately there)
         if (motorOutput < 0.1 && motorOutput > -0.1) {
             lastKnownPosition = targetHeight;
         } 
         
+        System.out.println(motorOutput);
         manualShift(motorOutput);
     }
 
