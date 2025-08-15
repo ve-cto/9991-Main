@@ -70,6 +70,8 @@ public class Constants {
             DISCONNECT,
             DISABLED,
             IDLE,
+            IDLERED,
+            IDLEBLUE,
             AUTONOMOUS,
             LOADED,
             READY,

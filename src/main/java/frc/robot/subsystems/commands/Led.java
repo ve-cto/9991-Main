@@ -42,6 +42,14 @@ public class Led {
     private LEDPattern robotIdleBase = LEDPattern.gradient(GradientType.kContinuous, Color.kBlue, Color.kPurple).scrollAtRelativeSpeed(Percent.per(Second).of(20)).atBrightness(Percent.of(80));
     private LEDPattern robotIdle = robotIdleBase.mask(robotIdleMask);
 
+    private LEDPattern robotIdleRedMask = LEDPattern.steps(Map.of(0, Color.kWhite, 0.75, Color.kBlack)).scrollAtRelativeSpeed(Percent.per(Second).of(10));
+    private LEDPattern robotIdleRedBase = LEDPattern.gradient(GradientType.kContinuous, Color.kRed, Color.kPurple).scrollAtRelativeSpeed(Percent.per(Second).of(20)).atBrightness(Percent.of(80));
+    private LEDPattern robotRedIdle = robotIdleBase.mask(robotIdleMask);
+
+    private LEDPattern robotIdleBlueMask = LEDPattern.steps(Map.of(0, Color.kWhite, 0.75, Color.kBlack)).scrollAtRelativeSpeed(Percent.per(Second).of(10));
+    private LEDPattern robotIdleBlueBase = LEDPattern.gradient(GradientType.kContinuous, Color.kBlue, Color.kPurple).scrollAtRelativeSpeed(Percent.per(Second).of(20)).atBrightness(Percent.of(80));
+    private LEDPattern robotBlueIdle = robotIdleBase.mask(robotIdleMask);
+
     private LEDPattern robotAutonomousMask = LEDPattern.steps(Map.of(0, Color.kWhite, 0.05, Color.kBlack)).scrollAtRelativeSpeed(Percent.per(Second).of(50));
     private LEDPattern robotAutonomousBase = LEDPattern.rainbow(255, 200);
     private LEDPattern robotAutonomous = robotAutonomousBase.mask(robotAutonomousMask);
@@ -82,6 +90,12 @@ public class Led {
                 break;
             case IDLE:
                 robotIdle.applyTo(this.l_ledBuffer);
+                break;
+            case IDLERED:
+                robotRedIdle.applyTo(this.l_ledBuffer);
+                break;
+            case IDLEBLUE:
+                robotBlueIdle.applyTo(this.l_ledBuffer);
                 break;
             case AUTONOMOUS:
                 robotAutonomous.applyTo(this.l_ledBuffer);

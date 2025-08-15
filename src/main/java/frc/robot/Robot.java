@@ -218,6 +218,7 @@ public class Robot extends TimedRobot {
   public void autonomousPeriodic() {
     ledBuffer = Constants.Led.StatusList.AUTONOMOUS;
     autoState = "Idle";
+    double t = autoTimer.get();
 
     switch (autoSelected) {
       case autoCustom1:
@@ -225,7 +226,6 @@ public class Robot extends TimedRobot {
         break;
   
       case autoDefault: {
-        double t = autoTimer.get();
         algae.stopArm();
         algae.stopGrabber();
         elevator.hold();
@@ -276,6 +276,14 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     ledTeleopBuffer = Constants.Led.StatusList.IDLE;
+
+    System.out.println(DriverStation.getAlliance().toString());
+    
+    // if (DriverStation.getAlliance().toString() == "Optional[Red]") {
+    //   ledTeleopBuffer = Constants.Led.StatusList.IDLERED;
+    // } else if (DriverStation.getAlliance().toString() == "Optional[Blue]") {
+    //   ledTeleopBuffer = Constants.Led.StatusList.IDLEBLUE;
+    // }
 
     // Reset the driving vars
     double forward = 0.0;
