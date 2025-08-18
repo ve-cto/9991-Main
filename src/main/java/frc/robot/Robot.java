@@ -369,22 +369,27 @@ public class Robot extends TimedRobot {
       driveSpeedCurrent = Constants.Drive.driveSpeedElevator;
     }
 
-    // If the driver is speeding up the robot, acknowledge their request, and bypass whatever the elevator is doing
-    if (controllerMap.isLeftTriggerC1Pressed() || controllerMap.isRightTriggerC1Pressed()) {
-      driveSpeedCurrent = Constants.Drive.driveSpeedFast;
-    } else if (controllerMap.isLeftTriggerC1Pressed() && controllerMap.isRightTriggerC1Pressed()) {
-      driveSpeedCurrent = Constants.Drive.driveSpeedFaster;
-    }
-
     // Arcadedrive the robot using the selected drive scheme
     if (driveSchemeSelected == 0) {
       // Single Controller
       forward = controllerMap.getLeftYC1();
       rotation = controllerMap.getRightXC1();
+
+      if (controllerMap.isLeftTriggerC1Pressed() || controllerMap.isRightTriggerC1Pressed()) {
+        driveSpeedCurrent = Constants.Drive.driveSpeedFast;
+      } else if (controllerMap.isLeftTriggerC1Pressed() && controllerMap.isRightTriggerC1Pressed()) {
+        driveSpeedCurrent = Constants.Drive.driveSpeedFaster;
+      }
     } else if (driveSchemeSelected == 1) {
       // Two Controller
       forward = controllerMap.getLeftYC2();
       rotation = controllerMap.getRightXC2();
+
+      if (controllerMap.isLeftTriggerC2Pressed() || controllerMap.isRightTriggerC2Pressed()) {
+        driveSpeedCurrent = Constants.Drive.driveSpeedFast;
+      } else if (controllerMap.isLeftTriggerC2Pressed() && controllerMap.isRightTriggerC2Pressed()) {
+        driveSpeedCurrent = Constants.Drive.driveSpeedFaster;
+      }
     } else {
       forward = 0;
       rotation = 0;
