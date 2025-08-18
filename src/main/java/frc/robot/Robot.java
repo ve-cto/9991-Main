@@ -275,8 +275,6 @@ public class Robot extends TimedRobot {
   @SuppressWarnings("unlikely-arg-type")
   @Override
   public void teleopPeriodic() {
-    ledTeleopBuffer = Constants.Led.StatusList.IDLE;
-
     // System.out.println(DriverStation.getAlliance().toString());
     
     // if (DriverStation.getAlliance().toString() == "Optional[Red]") {
@@ -284,11 +282,6 @@ public class Robot extends TimedRobot {
     // } else if (DriverStation.getAlliance().toString() == "Optional[Blue]") {
     //   ledTeleopBuffer = Constants.Led.StatusList.IDLEBLUE;
     // }
-
-    // Reset the driving vars
-    double forward = 0.0;
-    double rotation = 0.0;
-    driveSpeedCurrent = Constants.Drive.driveSpeedNormal;
 
 
     // -------------------------------------------------------------------------------------------------------
@@ -305,7 +298,10 @@ public class Robot extends TimedRobot {
       elevator.manualShift(-0.25);
     } else if (controllerMap.isNoDPadC1Pressed()) {
       elevator.hold();
-    }
+    } 
+    // else if (controllerMap.isStartButtonC1Pressed()) {
+    //   elevator.home();
+    // }
 
     // if (controllerMap.isUpDPadC1Pressed()) {
     //   elevator.manualShift(0.5);
@@ -326,11 +322,6 @@ public class Robot extends TimedRobot {
       // endEffector.manualShift(-0.4);
     } else {
       endEffector.stop();
-    }
-
-    // If Coral's loaded, set LED's to ready. (Does not overwrite flashes)
-    if (endEffector.getCoralLoaded()) {
-      ledTeleopBuffer = Constants.Led.StatusList.READY;
     }
 
     // -------------------------------------------------------------------------------------------------------
@@ -355,6 +346,12 @@ public class Robot extends TimedRobot {
     // -------------------------------------------------------------------------------------------------------
     // DRIVE
     // -------------------------------------------------------------------------------------------------------
+    
+    // Reset the driving vars
+    double forward = 0.0;
+    double rotation = 0.0;
+    driveSpeedCurrent = Constants.Drive.driveSpeedNormal;
+    
     // // Handle Triggers for Drive Speed
     // if (controllerMap.isLeftTriggerC1Pressed() && !controllerMap.isRightTriggerC1Pressed()) {
     //   driveSpeedCurrent = Constants.Robot.driveSpeedSlow;
@@ -366,16 +363,14 @@ public class Robot extends TimedRobot {
     // }
 
     // Change the drive speed based on elevator position
-    // if (elevator.getPosition().equals(Constants.Elevator.Position.HOME)) {
-    //   driveSpeedCurrent = Constants.Drive.driveSpeedNormal;
-    // } else if (elevator.getPosition().equals(Constants.Elevator.Position.L1)) {
-    //   driveSpeedCurrent = Constants.Drive.driveSpeedL1;
-    // } else if (elevator.getPosition().equals(Constants.Elevator.Position.L2) || elevator.getPosition().equals(Constants.Elevator.Position.L3) || elevator.getPosition().equals(Constants.Elevator.Position.L4)) {
-    //   driveSpeedCurrent = Constants.Drive.driveSpeedElevator;
-    // }
+    if (elevator.getPosition().equals(Constants.Elevator.Position.HOME) || elevator.getPosition().equals(Constants.Elevator.Position.L1) || elevator.getPosition().equals(Constants.Elevator.Position.L2)) {
+      driveSpeedCurrent = Constants.Drive.driveSpeedNormal;
+    } else {
+      driveSpeedCurrent = Constants.Drive.driveSpeedElevator;
+    }
 
     // If the driver is speeding up the robot, acknowledge their request, and bypass whatever the elevator is doing
-    if ((controllerMap.isLeftTriggerC1Pressed() && !controllerMap.isRightTriggerC1Pressed()) || (!controllerMap.isLeftTriggerC1Pressed() && controllerMap.isRightTriggerC1Pressed())) {
+    if (controllerMap.isLeftTriggerC1Pressed() || controllerMap.isRightTriggerC1Pressed()) {
       driveSpeedCurrent = Constants.Drive.driveSpeedFast;
     } else if (controllerMap.isLeftTriggerC1Pressed() && controllerMap.isRightTriggerC1Pressed()) {
       driveSpeedCurrent = Constants.Drive.driveSpeedFaster;
@@ -384,12 +379,12 @@ public class Robot extends TimedRobot {
     // Arcadedrive the robot using the selected drive scheme
     if (driveSchemeSelected == 0) {
       // Single Controller
-      forward = controllerMap.getRightXC1();
-      rotation = controllerMap.getLeftYC1();
+      forward = controllerMap.getLeftYC1();
+      rotation = controllerMap.getRightXC1();
     } else if (driveSchemeSelected == 1) {
       // Two Controller
-      forward = controllerMap.getRightXC2();
-      rotation = -controllerMap.getLeftYC2();
+      forward = controllerMap.getLeftYC2();
+      rotation = controllerMap.getRightXC2();
     } else {
       forward = 0;
       rotation = 0;
@@ -411,12 +406,22 @@ public class Robot extends TimedRobot {
     //   System.out.println("Driving with joysticks...");
     // } 
 
-    this.forward = forward * Constants.Drive.turnMultiplier;
-    this.rotation = rotation;
-    this.forward = Math.min(Math.max(this.forward, -1.0), 1.0);
-    this.rotation = Math.min(Math.max(this.rotation, -1.0), 1.0);
-    driveSubsystem.drive(this.forward, this.rotation, driveSpeedCurrent); 
+
+    rotation = rotation * Constants.Drive.turnMultiplier;
     
+    forward = Math.min(Math.max(forward, -1.0), 1.0);
+    rotation = Math.min(Math.max(rotation, -1.0), 1.0);
+    driveSubsystem.drive(forward, rotation, driveSpeedCurrent); 
+
+
+    //
+    // LED's
+    //
+    ledTeleopBuffer = Constants.Led.StatusList.IDLE;
+    // If Coral's loaded, set LED's to ready. (Does not overwrite flashes)
+    if (endEffector.getCoralLoaded()) {
+      ledTeleopBuffer = Constants.Led.StatusList.READY;
+    }
     // Set the global buffer for LED's
     ledBuffer = ledTeleopBuffer;
   }
