@@ -18,7 +18,7 @@ import frc.robot.subsystems.commands.Elevator;
 import frc.robot.subsystems.commands.EndEffector;
 import frc.robot.subsystems.commands.Algae;
 import frc.robot.subsystems.commands.Led;
-
+import frc.robot.subsystems.commands.Limelight;
 // import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -39,6 +39,7 @@ public class Robot extends TimedRobot {
   private Led led;
   private Constants.Led.StatusList ledBuffer;
   private Constants.Led.StatusList ledTeleopBuffer;
+  private Limelight limelight;
   
   private Timer autoTimer;
   private String autoState;
@@ -105,6 +106,7 @@ public class Robot extends TimedRobot {
     endEffector = new EndEffector();
     algae = new Algae();
     led = new Led();
+    limelight = new Limelight();
 
     autoTimer = new Timer();
     
@@ -183,10 +185,7 @@ public class Robot extends TimedRobot {
       led.setStatus(ledBuffer);
     }
 
-    networkDriveForward.set(forward);
-    networkDriveRotation.set(rotation);
-    networkDriveSpeed.set(driveSpeedCurrent);
-    
+    limelight.periodic();
 
     networkElevatorPos.set(elevator.getPosition().toString());
     networkElevatorRHeight.set(elevator.getHeightRaw());
@@ -228,7 +227,6 @@ public class Robot extends TimedRobot {
       case autoDefault: {
         algae.stopArm();
         algae.stopGrabber();
-        elevator.hold();
   
         if (t < 5.0) {
           // 0–5s: intake
@@ -236,17 +234,19 @@ public class Robot extends TimedRobot {
           endEffector.intakeCoral();
           // Feed drivetrain even when stationary
           driveSubsystem.drive(0.0, 0.0, 1.0);
-        } else if (t < 7.0) {
-          // 5–7s: drive forward at 50%
-          autoState = "Driving";
+        } else if (t < 8.0) {
           endEffector.stop();
-          driveSubsystem.drive(0.5, 0.0, 1.0); // 50% forward, no turn
+          elevator.gotoL3();
         } else if (t < 9.0) {
           // 7–9s: release
           autoState = "Releasing";
           endEffector.releaseCoral();
+          elevator.hold();
           // Hold position and keep feeding drivetrain
           driveSubsystem.drive(0.0, 0.0, 1.0);
+        } else if (t < 13) {
+          endEffector.stop();
+          elevator.home();
         } else {
           // >9s: stop everything, keep feeding
           autoState = "Stopped";
@@ -295,7 +295,7 @@ public class Robot extends TimedRobot {
     } else if (controllerMap.isRightDPadC1Pressed()) {
       elevator.gotoL4();
     } else if (controllerMap.isDownDPadC1Pressed()) {
-      elevator.manualShift(-0.25);
+      elevator.home();
     } else if (controllerMap.isNoDPadC1Pressed()) {
       elevator.hold();
     } 
@@ -320,6 +320,8 @@ public class Robot extends TimedRobot {
     } else if (controllerMap.isLeftBumperC1Pressed()) {
       endEffector.intakeCoral();
       // endEffector.manualShift(-0.4);
+    } else if (controllerMap.isStartButtonC1Pressed()) {
+      endEffector.releaseL1Coral();
     } else {
       endEffector.stop();
     }
@@ -363,11 +365,11 @@ public class Robot extends TimedRobot {
     // }
 
     // Change the drive speed based on elevator position
-    if (elevator.getPosition().equals(Constants.Elevator.Position.HOME) || elevator.getPosition().equals(Constants.Elevator.Position.L1) || elevator.getPosition().equals(Constants.Elevator.Position.L2)) {
-      driveSpeedCurrent = Constants.Drive.driveSpeedNormal;
-    } else {
-      driveSpeedCurrent = Constants.Drive.driveSpeedElevator;
-    }
+    // if (elevator.getPosition().equals(Constants.Elevator.Position.HOME) || elevator.getPosition().equals(Constants.Elevator.Position.L1) || elevator.getPosition().equals(Constants.Elevator.Position.L2)) {
+    //   driveSpeedCurrent = Constants.Drive.driveSpeedNormal;
+    // } else {
+    //   driveSpeedCurrent = Constants.Drive.driveSpeedElevator;
+    // }
 
     // Arcadedrive the robot using the selected drive scheme
     if (driveSchemeSelected == 0) {
@@ -396,39 +398,38 @@ public class Robot extends TimedRobot {
       System.out.print("Strangely, a drive scheme could not be selected, and an error occured.");
     }
     
-    // if (controllerMap.isStartButtonC1Pressed()) {
-    //   // Aim and Range on Start Button
-    //   limelightDriveSubsystem.aimAndRange(40);
-    // } else if (controllerMap.isRightStickButtonC1Pressed()) {
-    //   // Aim on Right stick
-    //   limelightDriveSubsystem.aim(forward, driveSpeedCurrent);
-    // } else if (controllerMap.isLeftStickButtonC1Pressed()) {
-    //   // Range on Left Stick
-    //   limelightDriveSubsystem.range(50, rotation, driveSpeedCurrent);
-    // } else if (!controllerMap.isLeftStickButtonC1Pressed() && !controllerMap.isRightStickButtonC1Pressed() && !controllerMap.isStartButtonC1Pressed()) {
-    //   // If not currently using a limelight action, drive normally
-    //   driveSubsystem.drive(forward, rotation, driveSpeedCurrent);
-    //   System.out.println("Driving with joysticks...");
-    // } 
-
-
     rotation = rotation * Constants.Drive.turnMultiplier;
-    
     forward = Math.min(Math.max(forward, -1.0), 1.0);
     rotation = Math.min(Math.max(rotation, -1.0), 1.0);
-    driveSubsystem.drive(forward, rotation, driveSpeedCurrent); 
 
+    if (controllerMap.isRightStickButtonC1Pressed() && controllerMap.isLeftStickButtonC1Pressed()) {
+      forward = limelight.getRangeMotorOutput(0.0);
+      rotation = limelight.getAimMotorOutput(0.0);
+    } else if (controllerMap.isRightStickButtonC1Pressed()) {
+      rotation = limelight.getAimMotorOutput(-5.0);
+    } else if (controllerMap.isLeftStickButtonC1Pressed()) {
+      rotation = limelight.getAimMotorOutput(5.0);
+    }
+
+    driveSubsystem.drive(forward, rotation, driveSpeedCurrent); 
 
     //
     // LED's
     //
     ledTeleopBuffer = Constants.Led.StatusList.IDLE;
+    if (!elevator.getEndstop()) {
+      ledTeleopBuffer = Constants.Led.StatusList.UNSAFE;
+    }
     // If Coral's loaded, set LED's to ready. (Does not overwrite flashes)
     if (endEffector.getCoralLoaded()) {
       ledTeleopBuffer = Constants.Led.StatusList.READY;
     }
     // Set the global buffer for LED's
     ledBuffer = ledTeleopBuffer;
+
+    networkDriveForward.set(forward);
+    networkDriveRotation.set(rotation);
+    networkDriveSpeed.set(driveSpeedCurrent);
   }
 
   @Override

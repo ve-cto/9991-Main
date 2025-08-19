@@ -120,15 +120,17 @@ public class Elevator {
      */
     public void home() {
         targetPosition = Position.HOME;
-        if (!s_endstop.get() && getHeight() > 0.2) {
+        if (s_endstop.get() && getHeight() > 0.14) {
             setPosition(targetPosition);
         
-        } else if (!s_endstop.get() && getHeight() < 0.2) {
+        } else if (s_endstop.get() && getHeight() < 0.14) {
             manualShift(-0.1);
         
-        } else {
+        } else if (!s_endstop.get()) {
             manualShift(0.0);
             reset();
+        } else {
+            manualShift(0.0);
         }
     }
 
@@ -194,7 +196,7 @@ public class Elevator {
             desiredHeight = 0.6;
         }
         else if (targetHeight == Position.L4) {
-            desiredHeight = 1.24;
+            desiredHeight = 1.23;
         }
 
         double pidOutput = pid.calculate(getHeight(), desiredHeight);
@@ -209,11 +211,14 @@ public class Elevator {
         double motorOutput = Math.max(Constants.Elevator.maxSpeedDown, Math.min(compensatedOutput, Constants.Elevator.maxSpeedUp));
 
         // If the elevator is within the set range of the target height, set the last known position to that height. (it's approximately there)
-        if (motorOutput < 0.1 && motorOutput > -0.1) {
-            lastKnownPosition = targetHeight;
-        } 
         
-        System.out.println(motorOutput);
+        if (targetPosition != Elevator.Position.HOME) {
+            if (pidOutput < 0.2 && pidOutput > -0.2) {
+            lastKnownPosition = targetHeight;
+            } 
+        }
+        
+        // System.out.println(motorOutput);
         manualShift(motorOutput);
     }
 

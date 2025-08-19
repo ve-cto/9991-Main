@@ -22,6 +22,9 @@ public class DriveSubsystem {
         m_rightFollower.follow(m_rightLeader);
         m_leftFollower.follow(m_leftLeader);
 
+        m_rightFollower.setInverted(true);
+        m_rightLeader.setInverted(true);
+
         // group
         m_robotDrive = new DifferentialDrive(m_leftLeader, m_rightLeader);
         m_robotDrive.setSafetyEnabled(true);
@@ -42,7 +45,7 @@ public class DriveSubsystem {
         forward = Math.min(Math.max(forward * speed, -1.0), 1.0);
         rotation = Math.min(Math.max(rotation * speed, -1.0), 1.0);
 
-        m_robotDrive.arcadeDrive(forward, rotation);
+        m_robotDrive.arcadeDrive(-forward, -rotation);
     }
 
     public void feed() {

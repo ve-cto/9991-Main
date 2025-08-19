@@ -55,7 +55,7 @@ public class Constants {
         public static final double driveSpeedL1 = 0.4;
         public static final double driveSpeedNormal = 0.6;
         public static final double driveSpeedFast = 0.7;
-        public static final double driveSpeedFaster = 0.8;
+        public static final double driveSpeedFaster = 0.9;
         public static final double driveSpeedMax = 1.0;
 
         public static final double turnMultiplier = 1.2;
@@ -76,6 +76,7 @@ public class Constants {
             LOADED,
             READY,
             RELEASE,
+            UNSAFE,
             BLANK
         }
     }

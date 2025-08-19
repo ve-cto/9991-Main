@@ -34,13 +34,15 @@ public class Led {
     private LEDPattern robotDisconnectBase = LEDPattern.gradient(GradientType.kContinuous, Color.kDarkRed, Color.kDarkRed).atBrightness(Percent.of(50)); 
     private LEDPattern robotDisconnect = robotDisconnectBase.mask(robotDisconnectMask);
         
-    private LEDPattern robotDisabledMask = LEDPattern.steps(Map.of(0, Color.kWhite, 0.1, Color.kBlack)).scrollAtRelativeSpeed(Percent.per(Second).of(10));
+    private LEDPattern robotDisabledMask = LEDPattern.steps(Map.of(0, Color.kWhite, 0.3, Color.kBlack)).scrollAtRelativeSpeed(Percent.per(Second).of(10));
     private LEDPattern robotDisabledBase = LEDPattern.gradient(GradientType.kContinuous, Color.kOrangeRed, Color.kDarkRed).atBrightness(Percent.of(50));
     private LEDPattern robotDisabled = robotDisabledBase.mask(robotDisabledMask);
 
     private LEDPattern robotIdleMask = LEDPattern.steps(Map.of(0, Color.kWhite, 0.75, Color.kBlack)).scrollAtRelativeSpeed(Percent.per(Second).of(10));
     private LEDPattern robotIdleBase = LEDPattern.gradient(GradientType.kContinuous, Color.kBlue, Color.kPurple).scrollAtRelativeSpeed(Percent.per(Second).of(20)).atBrightness(Percent.of(80));
     private LEDPattern robotIdle = robotIdleBase.mask(robotIdleMask);
+
+    private LEDPattern robotElevatorUnsafe = LEDPattern.gradient(GradientType.kContinuous, Color.kRed, Color.kDarkRed).scrollAtRelativeSpeed(Percent.per(Second).of(20)).atBrightness(Percent.of(70));
 
     private LEDPattern robotIdleRedMask = LEDPattern.steps(Map.of(0, Color.kWhite, 0.75, Color.kBlack)).scrollAtRelativeSpeed(Percent.per(Second).of(10));
     private LEDPattern robotIdleRedBase = LEDPattern.gradient(GradientType.kContinuous, Color.kRed, Color.kPurple).scrollAtRelativeSpeed(Percent.per(Second).of(20)).atBrightness(Percent.of(80));
@@ -50,8 +52,8 @@ public class Led {
     private LEDPattern robotIdleBlueBase = LEDPattern.gradient(GradientType.kContinuous, Color.kBlue, Color.kPurple).scrollAtRelativeSpeed(Percent.per(Second).of(20)).atBrightness(Percent.of(80));
     private LEDPattern robotBlueIdle = robotIdleBase.mask(robotIdleMask);
 
-    private LEDPattern robotAutonomousMask = LEDPattern.steps(Map.of(0, Color.kWhite, 0.05, Color.kBlack)).scrollAtRelativeSpeed(Percent.per(Second).of(50));
-    private LEDPattern robotAutonomousBase = LEDPattern.rainbow(255, 200);
+    private LEDPattern robotAutonomousMask = LEDPattern.steps(Map.of(0, Color.kWhite, 0.6, Color.kBlack)).scrollAtRelativeSpeed(Percent.per(Second).of(50));
+    private LEDPattern robotAutonomousBase = LEDPattern.rainbow(255, 200).scrollAtRelativeSpeed(Percent.per(Second).of(25));
     private LEDPattern robotAutonomous = robotAutonomousBase.mask(robotAutonomousMask);
 
     private LEDPattern robotReady = LEDPattern.solid(Color.kLime).breathe(Seconds.of(3)).atBrightness(Percent.of(100));
@@ -63,7 +65,7 @@ public class Led {
 
     public Led() {
         l_led = new AddressableLED(Constants.Led.l_ledID);
-        l_ledBuffer = new AddressableLEDBuffer(150);
+        l_ledBuffer = new AddressableLEDBuffer(94);
         l_led.setLength(l_ledBuffer.getLength());
         l_led.setData(l_ledBuffer);
         this.isFlashing = false;
@@ -112,6 +114,8 @@ public class Led {
             case BLANK:
                 ledBlank.applyTo(this.l_ledBuffer);
                 break;
+            case UNSAFE:
+                robotElevatorUnsafe.applyTo(this.l_ledBuffer);
         }
 
         l_led.setData(this.l_ledBuffer);

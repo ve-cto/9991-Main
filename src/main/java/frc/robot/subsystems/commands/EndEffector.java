@@ -84,6 +84,13 @@ public class EndEffector {
         m_intake2.set(speed);
     }
 
+    public void releaseL1Coral() {
+        isCoralLoaded = false;
+        isCoralPastStage1 = false;
+        m_intake1.set(-0.35);
+        m_intake2.set(0.0);
+    }
+
     public void stop() {
         m_intake1.set(0.0);
         m_intake2.set(0.0);
