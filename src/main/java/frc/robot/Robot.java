@@ -330,9 +330,9 @@ public class Robot extends TimedRobot {
     // ALGAE
     // -------------------------------------------------------------------------------------------------------
     if (controllerMap.isAButtonC1Pressed()) {
-      algae.manualShiftGrabber(0.5);
+      algae.manualShiftGrabber(0.4);
     } else if (controllerMap.isBButtonC1Pressed()) {
-      algae.manualShiftGrabber(-0.5);
+      algae.manualShiftGrabber(-0.4);
     } else {
       algae.stopGrabber();
     }

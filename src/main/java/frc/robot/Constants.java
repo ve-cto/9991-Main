@@ -33,8 +33,8 @@ public class Constants {
     }
 
     public static class Algae {
-        public static final int m_armID = 10;
-        public static final int m_grabberID = 5;
+        public static final int m_armID = 5;
+        public static final int m_grabberID = 10;
 
     }
 
