@@ -24,6 +24,8 @@ public class Elevator {
         L2,
         L3,
         L4,
+        ALGAETOP,
+        ALGAEBOTTOM,
         UNKNOWN
     }
 
@@ -178,6 +180,22 @@ public class Elevator {
         feed();
     }
 
+    public void gotoAlgaeTop() {
+        if (lastKnownPosition != Position.UNKNOWN) {
+            setPosition(Position.ALGAETOP);
+            targetPosition = Position.ALGAETOP;
+        }
+        feed();
+    }
+
+    public void gotoAlgaeBottom() {
+        if (lastKnownPosition != Position.UNKNOWN) {
+            setPosition(Position.ALGAEBOTTOM);
+            targetPosition = Position.ALGAEBOTTOM;
+        }
+        feed();
+    }
+
     /*
      * Move the elevator to a height corresponding to each coral level.
      * Automatically applies acceleration graphs.
@@ -198,6 +216,11 @@ public class Elevator {
         else if (targetHeight == Position.L4) {
             desiredHeight = 1.23;
             // 1.23 is MAX
+            
+        } else if (targetHeight == Position.ALGAETOP) {
+            desiredHeight = 0.8;
+        } else if (targetHeight == Position.ALGAEBOTTOM) {
+            desiredHeight = 0.5;
         }
 
         double pidOutput = pid.calculate(getHeight(), desiredHeight);

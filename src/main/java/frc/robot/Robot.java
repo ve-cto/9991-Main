@@ -22,7 +22,7 @@ import frc.robot.subsystems.commands.Limelight;
 // import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+// import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 
 /**
  * The methods in this class are called automatically corresponding to each mode, as described in
@@ -62,6 +62,9 @@ public class Robot extends TimedRobot {
 
   private static final String autoDefault = "Default";
   private static final String autoCustom1 = "Custom1";
+  private static final String autoCustom2 = "Custom2";
+  private static final String autoCustom3 = "Custom3";
+  private static final String autoCustom4 = "Custom4";
   private String autoSelected;
   private final SendableChooser<String> autoChooser = new SendableChooser<>();
 
@@ -136,8 +139,11 @@ public class Robot extends TimedRobot {
     SmartDashboard.getBoolean("Prevent Driver Control?", preventDrive);
     SmartDashboard.getBoolean("Use Joysticks to Drive?", useJoystickDrive);
 
-    autoChooser.setDefaultOption("Default Auto", autoDefault);
-    autoChooser.addOption("Custom 1", autoCustom1);
+    autoChooser.setDefaultOption("Score on L3", autoDefault);
+    autoChooser.addOption("Drive off Starting Line", autoCustom1);
+    autoChooser.addOption("Score on L2", autoCustom2);
+    autoChooser.addOption("Score on L4", autoCustom3);
+    autoChooser.addOption("Remove Algae", autoCustom4);
     SmartDashboard.putData("Pick an auto to run in Autonomous.", autoChooser);
 
     driveSchemeChooser.setDefaultOption("Single-Controller Control", driveSchemeDefault);
@@ -221,70 +227,209 @@ public class Robot extends TimedRobot {
     double t = autoTimer.get();
 
     switch (autoSelected) {
-      case autoCustom1:
-        // Custom auto here (keep calling subsystem methods every loop to feed MotorSafety)
-        break;
+      // Place a coral on L3
       case autoDefault:
         algae.stopArm();
         algae.stopGrabber();
 
         if (t < 3) {
-          autoState = "1";
+          autoState = "Driving up to Coral Tree";
+
           endEffector.stop();
           elevator.home();
           driveSubsystem.drive(-0.5, 0.0, 1.0);
+
         } else if (t < 5) {
-          autoState = "2";
+          autoState = "Raising Elevator to L3";
+
           endEffector.stop();
-          driveSubsystem.drive(0.0, 0.0, 1.0);
+          driveSubsystem.stop();
           elevator.gotoL3();
+
         } else if (t < 6) {
-          autoState = "3";
+          autoState = "Releasing Coral on L3";
+
           elevator.gotoL3();
-          driveSubsystem.drive(0.0, 0.0, 1.0);
+          driveSubsystem.stop();
           endEffector.manualShift(0.7);
+          endEffector.debugState(0);
+
+        } else if (t < 8 ) {
+          autoState = "Lowering Elevator";
+
+          driveSubsystem.stop();
+          elevator.home();
+          endEffector.stop();
+
         } else {
-          autoState = "stop";
-          driveSubsystem.drive(0.0, 0.0, 1.0);
+          // Finished
+          autoState = "Finished";
+
+          driveSubsystem.stop();
           elevator.home();
           endEffector.stop();
         }
         break;
-      // case autoDefault: {
-      //   algae.stopArm();
-      //   algae.stopGrabber();
-  
-      //   if (t < 5.0) {
-      //     // 0–5s: intake
-      //     autoState = "Intaking";
-      //     endEffector.intakeCoral();
-      //     // Feed drivetrain even when stationary
-      //     driveSubsystem.drive(0.0, 0.0, 1.0);
-      //   } else if (t < 8.0) {
-      //     endEffector.stop();
-      //     elevator.gotoL3();
-      //   } else if (t < 9.0) {
-      //     // 7–9s: release
-      //     autoState = "Releasing";
-      //     endEffector.releaseCoral();
-      //     elevator.hold();
-      //     // Hold position and keep feeding drivetrain
-      //     driveSubsystem.drive(0.0, 0.0, 1.0);
-      //   } else if (t < 13) {
-      //     endEffector.stop();
-      //     elevator.home();
-      //   } else {
-      //     // >9s: stop everything, keep feeding
-      //     autoState = "Stopped";
-      //     endEffector.stop();
-      //     driveSubsystem.drive(0.0, 0.0, 1.0);
-      //   }
-      //   break;
-  
-      default:
-        // Safety fallback: stop and feed
+
+      // Drive off starting line, but do nothing else.
+      case autoCustom1:
         endEffector.stop();
-        driveSubsystem.drive(0.0, 0.0, 1.0);
+        elevator.home();
+        algae.stopArm();
+        algae.stopGrabber();
+        if (t < 2) {
+          driveSubsystem.drive(-0.5, 0.0, 1.0);
+        } else {
+          driveSubsystem.stop();
+        }
+        break;
+
+
+      case autoCustom2:
+        algae.stopArm();
+        algae.stopGrabber();
+
+        if (t < 3) {
+          autoState = "Driving up to Coral Tree";
+
+          endEffector.stop();
+          elevator.home();
+          driveSubsystem.drive(-0.6, 0.0, 1.0);
+        
+        } else if (t < 5) {
+          autoState = "Raising Elevator to L2";
+        
+          endEffector.stop();
+          driveSubsystem.stop();
+          elevator.gotoL2();
+        
+        } else if (t < 6) {
+          autoState = "Releasing Coral on L2";
+        
+          elevator.gotoL2();
+          driveSubsystem.stop();
+          endEffector.manualShift(0.7);
+          endEffector.debugState(0);
+        
+        } else if (t < 8 ) {
+          autoState = "Lowering Elevator";
+        
+          driveSubsystem.stop();
+          elevator.home();
+          endEffector.stop();
+        } else {
+          // Finished
+          autoState = "Finished";
+        
+          driveSubsystem.stop();
+          elevator.home();
+          endEffector.stop();
+        }
+        break;
+
+
+      case autoCustom3:
+        algae.stopArm();
+        algae.stopGrabber();
+
+        if (t < 3) {
+          autoState = "Driving up to Coral Tree";
+
+          endEffector.stop();
+          elevator.home();
+          driveSubsystem.drive(-0.6, 0.0, 1.0);
+        
+        } else if (t < 6) {
+          autoState = "Raising Elevator to L4";
+        
+          endEffector.stop();
+          driveSubsystem.stop();
+          elevator.gotoL2();
+        
+        } else if (t < 7) {
+          autoState = "Releasing Coral on L4";
+        
+          elevator.gotoL2();
+          driveSubsystem.stop();
+          endEffector.manualShift(0.7);
+          endEffector.debugState(0);
+        
+        } else if (t < 10) {
+          autoState = "Lowering Elevator";
+        
+          driveSubsystem.stop();
+          elevator.home();
+          endEffector.stop();
+        } else {
+          // Finished
+          autoState = "Finished";
+        
+          driveSubsystem.stop();
+          elevator.home();
+          endEffector.stop();
+        }
+        break;
+
+
+      case autoCustom4:
+        endEffector.stop();
+        driveSubsystem.stop();
+        elevator.hold();
+        algae.stopGrabber();
+
+        if (t < 2) {
+          autoState = "Driving close to Coral Tree";
+
+          driveSubsystem.drive(-0.6, 0.0, 1.0);
+        } else if (t < 4) {
+          autoState = "Lifting Arm";
+
+          algae.manualShiftArm(-0.5);
+        } else if (t < 6) {
+          autoState = "Driving up to Coral Tree";
+
+          algae.stopArm();
+          algae.manualShiftGrabber(-0.6);
+          driveSubsystem.drive(-0.5, 0.0, 1.0);
+        } else if (t < 7) {
+          autoState = "Grabbing Algae";
+
+          algae.manualShiftGrabber(-0.6);
+          algae.manualShiftArm(0.1);
+          driveSubsystem.stop();
+        } else if (t < 7.5) {
+          algae.manualShiftGrabber(-0.6);
+          algae.stopArm();
+          driveSubsystem.drive(0.4, 0.0, 0.0);
+        } else if (t < 8) {
+          autoState = "Algae Released, placing Coral";
+
+          driveSubsystem.drive(-0.1, 0.4, 1.0);
+          algae.stopGrabber();
+        } else if (t < 10) {
+          autoState = "Raising Elevator";
+
+          elevator.gotoL3();
+        } else if (t < 12) {
+          autoState = "Re-aligning...";
+          
+          driveSubsystem.drive(-0.6, 0.0, 1.0);
+        } else if (t < 13) {
+          
+          driveSubsystem.stop();
+          endEffector.releaseCoral();
+        } else if (t < 15) {
+          endEffector.stop();
+          elevator.home();
+          algae.stopArm();
+        }
+
+        break;
+        
+      // if none of the above auto's gets triggered (something goes wrong), stop everything
+      default:
+        endEffector.stop();
+        driveSubsystem.stop();
         elevator.hold();
         algae.stopArm();
         algae.stopGrabber();

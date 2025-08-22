@@ -49,6 +49,10 @@ public class DriveSubsystem {
         m_robotDrive.arcadeDrive(-forward, -rotation);
     }
 
+    public void stop() {
+        drive(0.0, 0.0, 1.0);
+    }
+
     public void feed() {
         // System.out.println("Feed method has been called");
         m_leftFollower.feed();
