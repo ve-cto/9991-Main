@@ -205,6 +205,7 @@ public class Robot extends TimedRobot {
   public void autonomousInit() {
     autoSelected = autoChooser.getSelected();
 
+    autoTimer.reset();
     autoTimer.start();
     autoTimer.restart();
     (autonomousTable.getStringTopic("Running Auto").publish()).set(autoSelected);
@@ -224,15 +225,30 @@ public class Robot extends TimedRobot {
         // Custom auto here (keep calling subsystem methods every loop to feed MotorSafety)
         break;
       case autoDefault:
-        elevator.home();
-        endEffector.stop();
         algae.stopArm();
         algae.stopGrabber();
 
         if (t < 3) {
-          driveSubsystem.drive(0.5, 0.0, 1.0);
+          autoState = "1";
+          endEffector.stop();
+          elevator.home();
+          driveSubsystem.drive(-0.5, 0.0, 1.0);
+        } else if (t < 5) {
+          autoState = "2";
+          endEffector.stop();
+          driveSubsystem.drive(0.0, 0.0, 1.0);
+          elevator.gotoL3();
+        } else if (t < 6) {
+          autoState = "3";
+          elevator.gotoL3();
+          driveSubsystem.drive(0.0, 0.0, 1.0);
+          endEffector.manualShift(0.7);
+        } else {
+          autoState = "stop";
+          driveSubsystem.drive(0.0, 0.0, 1.0);
+          elevator.home();
+          endEffector.stop();
         }
-
         break;
       // case autoDefault: {
       //   algae.stopArm();
@@ -269,6 +285,9 @@ public class Robot extends TimedRobot {
         // Safety fallback: stop and feed
         endEffector.stop();
         driveSubsystem.drive(0.0, 0.0, 1.0);
+        elevator.hold();
+        algae.stopArm();
+        algae.stopGrabber();
         break;
       }
       networkAutoState.set(autoState);
@@ -305,9 +324,11 @@ public class Robot extends TimedRobot {
       elevator.gotoL4();
     } else if (controllerMap.isDownDPadC1Pressed()) {
       elevator.home();
-    } else if (controllerMap.isNoDPadC1Pressed()) {
+    } else if (controllerMap.isNoDPadC1Pressed() && !controllerMap.isStartButtonC1Pressed()) {
       elevator.hold();
-    } 
+    } else if (controllerMap.isStartButtonC1Pressed()) {
+      elevator.manualShift(-0.6);
+    }
     // else if (controllerMap.isStartButtonC1Pressed()) {
     //   elevator.home();
     // }
@@ -328,9 +349,10 @@ public class Robot extends TimedRobot {
       // endEffector.manualShift(0.4);
     } else if (controllerMap.isLeftBumperC1Pressed()) {
       endEffector.intakeCoral();
-      // endEffector.manualShift(-0.4);
-    } else if (controllerMap.isStartButtonC1Pressed()) {
-      endEffector.releaseL1Coral();
+    //   // endEffector.manualShift(-0.4);
+    // } else if (controllerMap.isStartButtonC1Pressed()) {
+    //   endEffector.releaseL1Coral();
+    // } 
     } else {
       endEffector.stop();
     }
@@ -395,6 +417,11 @@ public class Robot extends TimedRobot {
       // Two Controller
       forward = controllerMap.getLeftYC2();
       rotation = controllerMap.getRightXC2();
+
+      if (controllerMap.isLeftTriggerC1Pressed() && controllerMap.isRightTriggerC1Pressed()) {
+        endEffector.manualShift(-0.8);
+        endEffector.debugState(0);
+      }
 
       if (controllerMap.isLeftTriggerC2Pressed() || controllerMap.isRightTriggerC2Pressed()) {
         driveSpeedCurrent = Constants.Drive.driveSpeedFast;

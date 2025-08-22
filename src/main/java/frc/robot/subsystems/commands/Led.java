@@ -38,7 +38,7 @@ public class Led {
     private LEDPattern robotDisabledBase = LEDPattern.gradient(GradientType.kContinuous, Color.kOrangeRed, Color.kDarkRed).atBrightness(Percent.of(50));
     private LEDPattern robotDisabled = robotDisabledBase.mask(robotDisabledMask);
 
-    private LEDPattern robotIdleMask = LEDPattern.steps(Map.of(0, Color.kWhite, 0.75, Color.kBlack)).scrollAtRelativeSpeed(Percent.per(Second).of(10));
+    private LEDPattern robotIdleMask = LEDPattern.steps(Map.of(0, Color.kWhite, 0.4, Color.kBlack)).scrollAtRelativeSpeed(Percent.per(Second).of(10));
     private LEDPattern robotIdleBase = LEDPattern.gradient(GradientType.kContinuous, Color.kBlue, Color.kPurple).scrollAtRelativeSpeed(Percent.per(Second).of(20)).atBrightness(Percent.of(80));
     private LEDPattern robotIdle = robotIdleBase.mask(robotIdleMask);
 
