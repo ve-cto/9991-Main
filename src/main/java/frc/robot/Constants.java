@@ -46,10 +46,12 @@ public class Constants {
     }
 
     public static class Drive {
-        public static final int m_driveFLID = 8;
-        public static final int m_driveFRID = 6;
-        public static final int m_driveBLID = 9;
-        public static final int m_driveBRID = 7;
+        public static final int m_driveFRID = 7;
+        public static final int m_driveBRID = 6;
+
+        public static final int m_driveFLID = 9;
+        public static final int m_driveBLID = 8;
+
 
         public static final double driveSpeedElevator = 0.4;
         public static final double driveSpeedL1 = 0.4;
@@ -58,7 +60,7 @@ public class Constants {
         public static final double driveSpeedFaster = 0.9;
         public static final double driveSpeedMax = 1.0;
 
-        public static final double turnMultiplier = 1.2;
+        public static final double turnMultiplier = 1.5;
     }
 
     public static class Field {}

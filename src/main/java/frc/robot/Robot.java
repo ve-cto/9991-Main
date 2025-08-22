@@ -223,38 +223,47 @@ public class Robot extends TimedRobot {
       case autoCustom1:
         // Custom auto here (keep calling subsystem methods every loop to feed MotorSafety)
         break;
-  
-      case autoDefault: {
+      case autoDefault:
+        elevator.home();
+        endEffector.stop();
         algae.stopArm();
         algae.stopGrabber();
-  
-        if (t < 5.0) {
-          // 0–5s: intake
-          autoState = "Intaking";
-          endEffector.intakeCoral();
-          // Feed drivetrain even when stationary
-          driveSubsystem.drive(0.0, 0.0, 1.0);
-        } else if (t < 8.0) {
-          endEffector.stop();
-          elevator.gotoL3();
-        } else if (t < 9.0) {
-          // 7–9s: release
-          autoState = "Releasing";
-          endEffector.releaseCoral();
-          elevator.hold();
-          // Hold position and keep feeding drivetrain
-          driveSubsystem.drive(0.0, 0.0, 1.0);
-        } else if (t < 13) {
-          endEffector.stop();
-          elevator.home();
-        } else {
-          // >9s: stop everything, keep feeding
-          autoState = "Stopped";
-          endEffector.stop();
-          driveSubsystem.drive(0.0, 0.0, 1.0);
+
+        if (t < 3) {
+          driveSubsystem.drive(0.5, 0.0, 1.0);
         }
+
         break;
-      }
+      // case autoDefault: {
+      //   algae.stopArm();
+      //   algae.stopGrabber();
+  
+      //   if (t < 5.0) {
+      //     // 0–5s: intake
+      //     autoState = "Intaking";
+      //     endEffector.intakeCoral();
+      //     // Feed drivetrain even when stationary
+      //     driveSubsystem.drive(0.0, 0.0, 1.0);
+      //   } else if (t < 8.0) {
+      //     endEffector.stop();
+      //     elevator.gotoL3();
+      //   } else if (t < 9.0) {
+      //     // 7–9s: release
+      //     autoState = "Releasing";
+      //     endEffector.releaseCoral();
+      //     elevator.hold();
+      //     // Hold position and keep feeding drivetrain
+      //     driveSubsystem.drive(0.0, 0.0, 1.0);
+      //   } else if (t < 13) {
+      //     endEffector.stop();
+      //     elevator.home();
+      //   } else {
+      //     // >9s: stop everything, keep feeding
+      //     autoState = "Stopped";
+      //     endEffector.stop();
+      //     driveSubsystem.drive(0.0, 0.0, 1.0);
+      //   }
+      //   break;
   
       default:
         // Safety fallback: stop and feed

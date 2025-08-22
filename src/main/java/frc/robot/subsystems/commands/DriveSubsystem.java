@@ -18,6 +18,7 @@ public class DriveSubsystem {
         m_leftLeader = new WPI_VictorSPX(Constants.Drive.m_driveFLID);
         m_leftFollower = new WPI_VictorSPX(Constants.Drive.m_driveBLID);
 
+        m_leftFollower.setInverted(true);
         // Set followers
         m_rightFollower.follow(m_rightLeader);
         m_leftFollower.follow(m_leftLeader);

@@ -1,6 +1,6 @@
 {
   "version": 1.0,
-  "grid_size": 128,
+  "grid_size": 64,
   "tabs": [
     {
       "name": "Debug",
@@ -11,7 +11,7 @@
             "x": 256.0,
             "y": 0.0,
             "width": 256.0,
-            "height": 384.0,
+            "height": 448.0,
             "type": "List Layout",
             "properties": {
               "label_position": "TOP"
@@ -80,7 +80,7 @@
             "x": 0.0,
             "y": 0.0,
             "width": 256.0,
-            "height": 512.0,
+            "height": 448.0,
             "type": "List Layout",
             "properties": {
               "label_position": "TOP"
@@ -165,7 +165,7 @@
             "x": 512.0,
             "y": 0.0,
             "width": 256.0,
-            "height": 384.0,
+            "height": 320.0,
             "type": "List Layout",
             "properties": {
               "label_position": "TOP"
@@ -206,8 +206,8 @@
           },
           {
             "title": "LED's",
-            "x": 768.0,
-            "y": 0.0,
+            "x": 512.0,
+            "y": 320.0,
             "width": 256.0,
             "height": 256.0,
             "type": "List Layout",
@@ -250,37 +250,50 @@
           },
           {
             "title": "SmartDashboard",
-            "x": 768.0,
-            "y": 256.0,
+            "x": 1024.0,
+            "y": 0.0,
             "width": 256.0,
-            "height": 256.0,
+            "height": 576.0,
             "type": "List Layout",
             "properties": {
               "label_position": "TOP"
             },
             "children": [
               {
-                "title": "Pick an auto.",
+                "title": "Is coral loaded in the robot for Autonomous?",
                 "x": 0.0,
                 "y": 0.0,
                 "width": 128.0,
                 "height": 128.0,
                 "type": "ComboBox Chooser",
                 "properties": {
-                  "topic": "/SmartDashboard/Pick an auto.",
+                  "topic": "/SmartDashboard/Is coral loaded in the robot for Autonomous?",
                   "period": 0.06,
                   "sort_options": false
                 }
               },
               {
-                "title": "selectedDriveMode",
+                "title": "Pick an auto to run in Autonomous.",
                 "x": 0.0,
                 "y": 0.0,
                 "width": 128.0,
                 "height": 128.0,
                 "type": "ComboBox Chooser",
                 "properties": {
-                  "topic": "/SmartDashboard/selectedDriveMode",
+                  "topic": "/SmartDashboard/Pick an auto to run in Autonomous.",
+                  "period": 0.06,
+                  "sort_options": false
+                }
+              },
+              {
+                "title": "How to control the robot?",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "ComboBox Chooser",
+                "properties": {
+                  "topic": "/SmartDashboard/How to control the robot?",
                   "period": 0.06,
                   "sort_options": false
                 }
@@ -289,10 +302,10 @@
           },
           {
             "title": "List Layout",
-            "x": 1024.0,
+            "x": 768.0,
             "y": 0.0,
             "width": 256.0,
-            "height": 512.0,
+            "height": 576.0,
             "type": "List Layout",
             "properties": {
               "label_position": "TOP"
@@ -391,8 +404,8 @@
         "containers": [
           {
             "title": "FMSInfo",
-            "x": 256.0,
-            "y": 384.0,
+            "x": 0.0,
+            "y": 448.0,
             "width": 512.0,
             "height": 128.0,
             "type": "FMSInfo",
@@ -407,98 +420,104 @@
     {
       "name": "Main",
       "grid_layout": {
-        "layouts": [
-          {
-            "title": "List Layout",
-            "x": 0.0,
-            "y": 0.0,
-            "width": 384.0,
-            "height": 640.0,
-            "type": "List Layout",
-            "properties": {
-              "label_position": "TOP"
-            },
-            "children": [
-              {
-                "title": "EventName",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "/FMSInfo/EventName",
-                  "period": 0.06,
-                  "data_type": "string",
-                  "show_submit_button": false
-                }
-              },
-              {
-                "title": "MatchNumber",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "/FMSInfo/MatchNumber",
-                  "period": 0.06,
-                  "data_type": "int",
-                  "show_submit_button": false
-                }
-              },
-              {
-                "title": "StationNumber",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "/FMSInfo/StationNumber",
-                  "period": 0.06,
-                  "data_type": "int",
-                  "show_submit_button": false
-                }
-              },
-              {
-                "title": "GameSpecificMessage",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "/FMSInfo/GameSpecificMessage",
-                  "period": 0.06,
-                  "data_type": "string",
-                  "show_submit_button": false
-                }
-              }
-            ]
-          }
-        ],
+        "layouts": [],
         "containers": [
           {
             "title": "Intake Status",
-            "x": 1024.0,
-            "y": 512.0,
-            "width": 256.0,
+            "x": 896.0,
+            "y": 128.0,
+            "width": 384.0,
             "height": 128.0,
-            "type": "Text Display",
+            "type": "Large Text Display",
             "properties": {
               "topic": "/EndEffector/Intake Status",
               "period": 0.06,
-              "data_type": "string",
-              "show_submit_button": false
+              "data_type": "string"
+            }
+          },
+          {
+            "title": "Pick an auto.",
+            "x": 896.0,
+            "y": 256.0,
+            "width": 384.0,
+            "height": 128.0,
+            "type": "ComboBox Chooser",
+            "properties": {
+              "topic": "/SmartDashboard/Pick an auto.",
+              "period": 0.06,
+              "sort_options": false
+            }
+          },
+          {
+            "title": "Elevator Position",
+            "x": 896.0,
+            "y": 0.0,
+            "width": 384.0,
+            "height": 128.0,
+            "type": "Large Text Display",
+            "properties": {
+              "topic": "/Elevator/Elevator Position",
+              "period": 0.06,
+              "data_type": "string"
+            }
+          },
+          {
+            "title": "USB Camera 0",
+            "x": 384.0,
+            "y": 0.0,
+            "width": 512.0,
+            "height": 384.0,
+            "type": "Camera Stream",
+            "properties": {
+              "topic": "/CameraPublisher/USB Camera 0",
+              "period": 0.06,
+              "rotation_turns": 0
+            }
+          },
+          {
+            "title": "limelight",
+            "x": 0.0,
+            "y": 0.0,
+            "width": 384.0,
+            "height": 384.0,
+            "type": "Camera Stream",
+            "properties": {
+              "topic": "/CameraPublisher/limelight",
+              "period": 0.06,
+              "rotation_turns": 0
+            }
+          },
+          {
+            "title": "Station Number",
+            "x": 384.0,
+            "y": 384.0,
+            "width": 128.0,
+            "height": 192.0,
+            "type": "Large Text Display",
+            "properties": {
+              "topic": "/FMSInfo/StationNumber",
+              "period": 0.06,
+              "data_type": "int"
+            }
+          },
+          {
+            "title": "FMSInfo",
+            "x": 512.0,
+            "y": 384.0,
+            "width": 384.0,
+            "height": 192.0,
+            "type": "FMSInfo",
+            "properties": {
+              "topic": "/FMSInfo",
+              "period": 0.06
             }
           },
           {
             "title": "Coral Loaded?",
-            "x": 384.0,
-            "y": 256.0,
-            "width": 512.0,
-            "height": 384.0,
+            "x": 896.0,
+            "y": 384.0,
+            "width": 384.0,
+            "height": 192.0,
             "type": "Boolean Box",
             "properties": {
               "topic": "/EndEffector/Coral Loaded?",
@@ -511,70 +530,80 @@
             }
           },
           {
-            "title": "Elevator Position",
-            "x": 384.0,
-            "y": 0.0,
-            "width": 512.0,
-            "height": 256.0,
-            "type": "Large Text Display",
-            "properties": {
-              "topic": "/Elevator/Elevator Position",
-              "period": 0.06,
-              "data_type": "string"
-            }
-          },
-          {
-            "title": "Running Auto",
-            "x": 1024.0,
-            "y": 128.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/Autonomous/Running Auto",
-              "period": 0.06,
-              "data_type": "string",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "Pick an auto.",
-            "x": 1024.0,
-            "y": 0.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "ComboBox Chooser",
-            "properties": {
-              "topic": "/SmartDashboard/Pick an auto.",
-              "period": 0.06,
-              "sort_options": false
-            }
-          },
-          {
-            "title": "selectedDriveMode",
-            "x": 1024.0,
-            "y": 256.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "ComboBox Chooser",
-            "properties": {
-              "topic": "/SmartDashboard/selectedDriveMode",
-              "period": 0.06,
-              "sort_options": false
-            }
-          },
-          {
-            "title": "Drive Scheme",
-            "x": 1024.0,
+            "title": "Coral Loaded for Auto?",
+            "x": 192.0,
             "y": 384.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "Text Display",
+            "width": 192.0,
+            "height": 192.0,
+            "type": "ComboBox Chooser",
             "properties": {
-              "topic": "/Drive/Drive Scheme",
+              "topic": "/SmartDashboard/Is coral loaded in the robot for Autonomous?",
               "period": 0.06,
-              "data_type": "string",
-              "show_submit_button": false
+              "sort_options": false
+            }
+          },
+          {
+            "title": "Control Scheme",
+            "x": 0.0,
+            "y": 384.0,
+            "width": 192.0,
+            "height": 192.0,
+            "type": "ComboBox Chooser",
+            "properties": {
+              "topic": "/SmartDashboard/How to control the robot?",
+              "period": 0.06,
+              "sort_options": false
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Blind Guy Mode",
+      "grid_layout": {
+        "layouts": [],
+        "containers": [
+          {
+            "title": "USB Camera 0",
+            "x": 448.0,
+            "y": 0.0,
+            "width": 640.0,
+            "height": 576.0,
+            "type": "Camera Stream",
+            "properties": {
+              "topic": "/CameraPublisher/USB Camera 0",
+              "period": 0.06,
+              "rotation_turns": 0
+            }
+          },
+          {
+            "title": "Coral Loaded?",
+            "x": 1088.0,
+            "y": 0.0,
+            "width": 192.0,
+            "height": 576.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/EndEffector/Coral Loaded?",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "limelight",
+            "x": 0.0,
+            "y": 0.0,
+            "width": 448.0,
+            "height": 576.0,
+            "type": "Camera Stream",
+            "properties": {
+              "topic": "/CameraPublisher/limelight",
+              "period": 0.06,
+              "rotation_turns": 0
             }
           }
         ]

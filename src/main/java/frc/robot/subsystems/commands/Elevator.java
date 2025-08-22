@@ -196,7 +196,8 @@ public class Elevator {
             desiredHeight = 0.6;
         }
         else if (targetHeight == Position.L4) {
-            desiredHeight = 1.23;
+            desiredHeight = 1.21;
+            // 1.23
         }
 
         double pidOutput = pid.calculate(getHeight(), desiredHeight);

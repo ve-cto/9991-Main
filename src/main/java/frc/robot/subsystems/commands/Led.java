@@ -65,7 +65,7 @@ public class Led {
 
     public Led() {
         l_led = new AddressableLED(Constants.Led.l_ledID);
-        l_ledBuffer = new AddressableLEDBuffer(94);
+        l_ledBuffer = new AddressableLEDBuffer(101);
         l_led.setLength(l_ledBuffer.getLength());
         l_led.setData(l_ledBuffer);
         this.isFlashing = false;
