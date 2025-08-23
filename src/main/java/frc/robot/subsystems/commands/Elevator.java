@@ -126,7 +126,7 @@ public class Elevator {
             setPosition(targetPosition);
         
         } else if (s_endstop.get() && getHeight() < 0.14) {
-            manualShift(-0.1);
+            manualShift(-0.13);
         
         } else if (!s_endstop.get()) {
             manualShift(0.0);

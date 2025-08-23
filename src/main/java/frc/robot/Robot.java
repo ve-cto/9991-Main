@@ -237,7 +237,7 @@ public class Robot extends TimedRobot {
 
           endEffector.stop();
           elevator.home();
-          driveSubsystem.drive(-0.5, 0.0, 1.0);
+          driveSubsystem.drive(-0.55, limelight.getAimMotorOutput(0.0), 1.0);
 
         } else if (t < 5) {
           autoState = "Raising Elevator to L3";
@@ -294,7 +294,7 @@ public class Robot extends TimedRobot {
 
           endEffector.stop();
           elevator.home();
-          driveSubsystem.drive(-0.6, 0.0, 1.0);
+          driveSubsystem.drive(-0.5, 0.0, 1.0);
         
         } else if (t < 5) {
           autoState = "Raising Elevator to L2";
@@ -337,70 +337,74 @@ public class Robot extends TimedRobot {
 
           endEffector.stop();
           elevator.home();
-          driveSubsystem.drive(-0.6, 0.0, 1.0);
+          driveSubsystem.drive(-0.55, limelight.getAimMotorOutput(0.0), 1.0);
         
-        } else if (t < 6) {
+        } else if (t < 8) {
           autoState = "Raising Elevator to L4";
         
           endEffector.stop();
-          driveSubsystem.stop();
-          elevator.gotoL2();
+          driveSubsystem.drive(-0.4, limelight.getAimMotorOutput(0.0), 1.0);
+          elevator.gotoL4();
         
-        } else if (t < 7) {
+        } else if (t < 9) {
           autoState = "Releasing Coral on L4";
         
-          elevator.gotoL2();
+          elevator.gotoL4();
           driveSubsystem.stop();
-          endEffector.manualShift(0.7);
-          endEffector.debugState(0);
+          endEffector.releaseCoral();
         
-        } else if (t < 10) {
+        } else if (t < 11) {
           autoState = "Lowering Elevator";
         
           driveSubsystem.stop();
           elevator.home();
           endEffector.stop();
-        } else {
+        } else  if (t <= 15) {
           // Finished
           autoState = "Finished";
         
           driveSubsystem.stop();
           elevator.home();
           endEffector.stop();
+          autoTimer.stop();
         }
         break;
 
 
       case autoCustom4:
-        endEffector.stop();
-        driveSubsystem.stop();
-        elevator.hold();
-        algae.stopGrabber();
-
         if (t < 2) {
           autoState = "Driving close to Coral Tree";
 
-          driveSubsystem.drive(-0.6, 0.0, 1.0);
-        } else if (t < 4) {
+          endEffector.stop();
+          elevator.home();
+          algae.stopGrabber();
+          driveSubsystem.drive(-0.54, 0.0, 1.0);
+        } else if (t < 5) {
           autoState = "Lifting Arm";
 
-          algae.manualShiftArm(-0.5);
+          endEffector.stop();
+          driveSubsystem.stop();
+          algae.stopGrabber();
+          algae.manualShiftArm(0.4);
+          elevator.gotoAlgaeBottom();
         } else if (t < 6) {
           autoState = "Driving up to Coral Tree";
 
+          elevator.gotoAlgaeBottom();
           algae.stopArm();
-          algae.manualShiftGrabber(-0.6);
-          driveSubsystem.drive(-0.5, 0.0, 1.0);
+          algae.manualShiftGrabber(-0.4);
+          driveSubsystem.drive(-0.7, 0.0, 1.0);
         } else if (t < 7) {
           autoState = "Grabbing Algae";
 
+          elevator.gotoAlgaeBottom();
           algae.manualShiftGrabber(-0.6);
-          algae.manualShiftArm(0.1);
+          algae.manualShiftArm(-0.05);
           driveSubsystem.stop();
         } else if (t < 7.5) {
           algae.manualShiftGrabber(-0.6);
           algae.stopArm();
-          driveSubsystem.drive(0.4, 0.0, 0.0);
+          driveSubsystem.drive(0.2, 0.0, 0.0);
         } else if (t < 8) {
           autoState = "Algae Released, placing Coral";
 
@@ -410,6 +414,7 @@ public class Robot extends TimedRobot {
           autoState = "Raising Elevator";
 
           elevator.gotoL3();
+          algae.manualShiftArm(-0.6);
         } else if (t < 12) {
           autoState = "Re-aligning...";
           
@@ -445,7 +450,7 @@ public class Robot extends TimedRobot {
     elevator.reset();
   }
 
-  @SuppressWarnings("unlikely-arg-type")
+  // @SuppressWarnings("unlikely-arg-type")
   @Override
   public void teleopPeriodic() {
     // System.out.println(DriverStation.getAlliance().toString());
@@ -469,11 +474,18 @@ public class Robot extends TimedRobot {
       elevator.gotoL4();
     } else if (controllerMap.isDownDPadC1Pressed()) {
       elevator.home();
-    } else if (controllerMap.isNoDPadC1Pressed() && !controllerMap.isStartButtonC1Pressed()) {
+    // } else if (controllerMap.isRightStickButtonC1Pressed()) {
+    //   elevator.gotoAlgaeTop();
+    // } else if (controllerMap.isLeftStickButtonC1Pressed()) {
+    //   elevator.gotoAlgaeBottom();
+    // } 
+    } else if (controllerMap.isNoDPadC1Pressed()) {
       elevator.hold();
-    } else if (controllerMap.isStartButtonC1Pressed()) {
-      elevator.manualShift(-0.6);
     }
+
+    // else if (controllerMap.isStartButtonC1Pressed()) {
+    //   elevator.manualShift(-0.6);
+    // }
     // else if (controllerMap.isStartButtonC1Pressed()) {
     //   elevator.home();
     // }
@@ -491,13 +503,8 @@ public class Robot extends TimedRobot {
     // -------------------------------------------------------------------------------------------------------
     if (controllerMap.isRightBumperC1Pressed()) {
       endEffector.releaseCoral();
-      // endEffector.manualShift(0.4);
     } else if (controllerMap.isLeftBumperC1Pressed()) {
       endEffector.intakeCoral();
-    //   // endEffector.manualShift(-0.4);
-    // } else if (controllerMap.isStartButtonC1Pressed()) {
-    //   endEffector.releaseL1Coral();
-    // } 
     } else {
       endEffector.stop();
     }
@@ -587,9 +594,9 @@ public class Robot extends TimedRobot {
       forward = limelight.getRangeMotorOutput(0.0);
       rotation = limelight.getAimMotorOutput(0.0);
     } else if (controllerMap.isRightStickButtonC1Pressed()) {
-      rotation = limelight.getAimMotorOutput(-5.0);
+      rotation = limelight.getAimMotorOutput(0.0);
     } else if (controllerMap.isLeftStickButtonC1Pressed()) {
-      rotation = limelight.getAimMotorOutput(5.0);
+      forward = limelight.getRangeMotorOutput(0.2);
     }
 
     driveSubsystem.drive(forward, rotation, driveSpeedCurrent); 

@@ -55,12 +55,12 @@ public class Constants {
 
         public static final double driveSpeedElevator = 0.4;
         public static final double driveSpeedL1 = 0.4;
-        public static final double driveSpeedNormal = 0.8;
-        public static final double driveSpeedFast = 0.9;
+        public static final double driveSpeedNormal = 0.7;
+        public static final double driveSpeedFast = 0.8;
         public static final double driveSpeedFaster = 1.0;
-        public static final double driveSpeedMax = 1.0;
+        public static final double driveSpeedMax = 0.95;
 
-        public static final double turnMultiplier = 1.4;
+        public static final double turnMultiplier = 1.0;
     }
 
     public static class Field {}
