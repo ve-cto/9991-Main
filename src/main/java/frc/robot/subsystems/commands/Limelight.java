@@ -22,7 +22,7 @@ public class Limelight {
 
     public double getAimMotorOutput(double offset) {    
         // control the intensity of the robots movements: too high = oscilate, too low = not enough power to move
-        double kP = 0.4;
+        double kP = 0.42;
 
         double targetingAngleUnmapped = (LimelightHelpers.getTX("limelight") + offset) * kP;
 
