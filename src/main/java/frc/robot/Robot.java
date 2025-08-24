@@ -237,7 +237,7 @@ public class Robot extends TimedRobot {
 
           endEffector.stop();
           elevator.home();
-          driveSubsystem.drive(-0.55, limelight.getAimMotorOutput(0.0), 1.0);
+          driveSubsystem.drive(-0.55, limelight.getAimMotorOutput(1.0), 1.0);
 
         } else if (t < 5) {
           autoState = "Raising Elevator to L3";
@@ -337,23 +337,24 @@ public class Robot extends TimedRobot {
 
           endEffector.stop();
           elevator.home();
-          driveSubsystem.drive(-0.55, limelight.getAimMotorOutput(0.0), 1.0);
+          driveSubsystem.drive(-0.55, limelight.getAimMotorOutput(1.1), 1.0);
         
         } else if (t < 8) {
           autoState = "Raising Elevator to L4";
         
           endEffector.stop();
-          driveSubsystem.drive(-0.4, limelight.getAimMotorOutput(0.0), 1.0);
+          driveSubsystem.drive(-0.6, limelight.getAimMotorOutput(0.4), 1.0);
           elevator.gotoL4();
         
-        } else if (t < 9) {
+        } else if (t < 10) {
           autoState = "Releasing Coral on L4";
         
           elevator.gotoL4();
-          driveSubsystem.stop();
-          endEffector.releaseCoral();
+          driveSubsystem.drive(-0.4, 0.0, 1.0);
+          endEffector.manualShift(0.62);
+          endEffector.debugState(0);
         
-        } else if (t < 11) {
+        } else if (t < 12) {
           autoState = "Lowering Elevator";
         
           driveSubsystem.stop();
@@ -441,20 +442,20 @@ public class Robot extends TimedRobot {
 
           endEffector.stop();
           elevator.home();
-          driveSubsystem.drive(-0.65, limelight.getAimMotorOutput(0.0), 1.0);
+          driveSubsystem.drive(-0.65, limelight.getAimMotorOutput(1.0), 1.0);
         
         } else if (t < 8) {
           autoState = "Raising Elevator to L4";
         
           endEffector.stop();
-          driveSubsystem.drive(-0.47, limelight.getAimMotorOutput(0.0), 1.0);
+          driveSubsystem.drive(-0.47, limelight.getAimMotorOutput(1.0), 1.0);
           elevator.gotoL4();
         
         } else if (t < 9) {
           autoState = "Releasing Coral on L4";
         
           elevator.gotoL4();
-          driveSubsystem.drive(-0.3, 0.0, 1.0);
+          driveSubsystem.drive(-0.4, limelight.getAimMotorOutput(1.0), 1.0);
           endEffector.releaseCoral();
         
         } else if (t < 11) {
@@ -523,6 +524,13 @@ public class Robot extends TimedRobot {
     // } else if (controllerMap.isLeftStickButtonC1Pressed()) {
     //   elevator.gotoAlgaeBottom();
     // } 
+    // } 
+    // else if (driveSchemeSelected == 1 && controllerMap.isNoDPadC1Pressed()) {
+    //   if (0.3 > controllerMap.getLeftYC1() && -0.3 < controllerMap.getLeftYC1()) {
+    //     elevator.manualShift(-0.5 * controllerMap.getLeftYC1());
+    //   } else {
+    //     elevator.hold();
+    //   }
     } else if (controllerMap.isNoDPadC1Pressed()) {
       elevator.hold();
     }
@@ -549,9 +557,13 @@ public class Robot extends TimedRobot {
       endEffector.releaseCoral();
     } else if (controllerMap.isLeftBumperC1Pressed()) {
       endEffector.intakeCoral();
+    } else if (controllerMap.isStartButtonC1Pressed()) {
+      endEffector.releaseL1Coral();
     } else {
       endEffector.stop();
     }
+
+    
 
     // -------------------------------------------------------------------------------------------------------
     // ALGAE
@@ -634,13 +646,12 @@ public class Robot extends TimedRobot {
     forward = Math.min(Math.max(forward, -1.0), 1.0);
     rotation = Math.min(Math.max(rotation, -1.0), 1.0);
 
-    if (controllerMap.isRightStickButtonC1Pressed() && controllerMap.isLeftStickButtonC1Pressed()) {
-      forward = limelight.getRangeMotorOutput(0.0);
-      rotation = limelight.getAimMotorOutput(0.0);
-    } else if (controllerMap.isRightStickButtonC1Pressed()) {
-      rotation = limelight.getAimMotorOutput(0.0);
-    } else if (controllerMap.isLeftStickButtonC1Pressed()) {
-      forward = limelight.getRangeMotorOutput(0.2);
+    // if (controllerMap.isRightStickButtonC1Pressed() && controllerMap.isLeftStickButtonC1Pressed()) {
+    //   forward = limelight.getRangeMotorOutput(0.0);
+    //   rotation = limelight.getAimMotorOutput(1.0);
+    // } else 
+    if (controllerMap.isRightStickButtonC2Pressed()) {
+      rotation = limelight.getAimMotorOutput(1.0);
     }
 
     driveSubsystem.drive(forward, rotation, driveSpeedCurrent); 

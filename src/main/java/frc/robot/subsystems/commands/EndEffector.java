@@ -87,8 +87,8 @@ public class EndEffector {
     public void releaseL1Coral() {
         isCoralLoaded = false;
         isCoralPastStage1 = false;
-        m_intake1.set(-0.35);
-        m_intake2.set(0.0);
+        m_intake1.set(-0.8);
+        m_intake2.set(-0.35);
     }
 
     public void stop() {

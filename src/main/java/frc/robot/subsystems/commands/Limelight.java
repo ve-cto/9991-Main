@@ -20,11 +20,11 @@ public class Limelight {
         limelightTY = LimelightHelpers.getTY(Limelight);
     }
 
-    public double getAimMotorOutput(double offset) {    
+    public double getAimMotorOutput(double multiplier) {    
         // control the intensity of the robots movements: too high = oscilate, too low = not enough power to move
         double kP = 0.42;
 
-        double targetingAngleUnmapped = (LimelightHelpers.getTX("limelight") + offset) * kP;
+        double targetingAngleUnmapped = (LimelightHelpers.getTX("limelight")) * kP * multiplier;
 
         double targetDesiredRotationSpeed = 10*mapRanges.MapTX(targetingAngleUnmapped);
 
